@@ -12,6 +12,21 @@ spring:
       hibernate:
         dialect: "org.hibernate.dialect.PostgreSQLDialect"
         show_sql: true
+  mail:
+    host: smtp.gmail.com
+    port: ${PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 server:
   port: ${SERVER_PORT:8081}
