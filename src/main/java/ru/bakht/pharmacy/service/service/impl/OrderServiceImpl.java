@@ -15,7 +15,7 @@ import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.repository.*;
 import ru.bakht.pharmacy.service.service.OrderService;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -76,7 +76,7 @@ public class OrderServiceImpl implements OrderService {
         var order = orderMapper.toEntity(orderDto);
         setRelatedEntities(order, orderDto);
 
-        order.setOrderDate(new Date());
+        order.setOrderDate(LocalDate.now());
         order.setTotalAmount(orderDto.getQuantity() * order.getMedication().getPrice());
 
         order = orderRepository.save(order);
@@ -104,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
         updateOrderFromDto(existingOrder, orderDto);
         setRelatedEntities(existingOrder, orderDto);
 
-        existingOrder.setOrderDate(new Date());
+        existingOrder.setOrderDate(LocalDate.now());
         existingOrder.setTotalAmount(orderDto.getQuantity() * existingOrder.getMedication().getPrice());
 
         updatePharmacyMedicationQuantity(orderDto);

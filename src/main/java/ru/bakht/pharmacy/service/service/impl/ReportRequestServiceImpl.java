@@ -8,7 +8,7 @@ import ru.bakht.pharmacy.service.model.ReportRequest;
 import ru.bakht.pharmacy.service.repository.ReportRequestRepository;
 import ru.bakht.pharmacy.service.service.ReportRequestService;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * Реализация интерфейса {@link ReportRequestService} для записи запросов на отчеты.
@@ -32,11 +32,11 @@ public class ReportRequestServiceImpl implements ReportRequestService {
                 .orElse(ReportRequest.builder()
                         .reportName(reportName)
                         .requestCount(0)
-                        .lastRequestTime(new Date())
+                        .lastRequestTime(LocalDate.now())
                         .build());
 
         reportRequest.setRequestCount(reportRequest.getRequestCount() + 1);
-        reportRequest.setLastRequestTime(new Date());
+        reportRequest.setLastRequestTime(LocalDate.now());
 
         reportRequestRepository.save(reportRequest);
 
