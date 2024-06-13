@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -26,7 +26,6 @@ public class ReportRequest {
     @Column(name = "request_count")
     Integer requestCount;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_request_time")
-    Date lastRequestTime;
+    LocalDate lastRequestTime;
 }

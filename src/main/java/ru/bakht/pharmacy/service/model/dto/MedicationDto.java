@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.bakht.pharmacy.service.model.enums.Form;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -29,7 +30,7 @@ public class MedicationDto {
     Double price;
 
     @NotNull(message = "Дата истечения срока обязательна")
-    Date expirationDate;
+    LocalDate expirationDate;
 
 
 }
