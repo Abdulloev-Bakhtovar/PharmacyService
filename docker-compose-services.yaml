@@ -3,7 +3,6 @@ version: '3.8'
 networks:
   pharmacy_network:
     external: true
-    driver: bridge
 
 services:
   redis:
@@ -36,9 +35,9 @@ services:
       SERVER_PORT: 8081
       MAIL_USERNAME: root@gmail.com
       MAIL_PASSWORD: password
-      OAUTH2_ISSUER_URI: http://keycloak:8080/realms/pharmacy-realm
+      OAUTH2_ISSUER_URI: http://pharmacy-keycloak:8080/realms/pharmacy-realm
       KEYCLOAK_CLIENT_ID: pharmacy-client
-      KEYCLOAK_CLIENT_SECRET: 4iqsI0dPC1ZLtnie34xNKo1wyMOR9Bgp
+      KEYCLOAK_CLIENT_SECRET: pLgjRsv0J30klbROqjshjrEfBzPwnceC
     ports:
       - "8081:8081"
     depends_on:

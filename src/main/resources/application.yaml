@@ -39,21 +39,24 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${OAUTH2_ISSUER_URI:http://localhost:8083/realms/pharmacy-realm}"
+          issuer-uri: "${OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
       client:
         provider:
           keycloak:
-            issuer-uri: "${OAUTH2_ISSUER_URI:http://localhost:8083/realms/pharmacy-realm}"
+            issuer-uri: "${OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
             user-name-attribute: preferred_username
         registration:
           keycloak:
             client-id: "${KEYCLOAK_CLIENT_ID:pharmacy-client}"
-            client-secret: "${KEYCLOAK_CLIENT_SECRET:mHG3auBWbP0vmnGnDZ2qFmizPTY9oWno}"
-            scope: openid
+            client-secret: "${KEYCLOAK_CLIENT_SECRET:pLgjRsv0J30klbROqjshjrEfBzPwnceC}"
+            scope:
+              - email
+              - profile
+              - openid
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
 server:
-  port: "${SERVER_PORT:8082}"
+  port: "${SERVER_PORT:8081}"
