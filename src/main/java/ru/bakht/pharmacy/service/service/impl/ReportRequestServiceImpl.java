@@ -15,6 +15,7 @@ import java.time.LocalDate;
  */
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReportRequestServiceImpl implements ReportRequestService {
 
@@ -23,10 +24,9 @@ public class ReportRequestServiceImpl implements ReportRequestService {
     /**
      * {@inheritDoc}
      */
-    @Transactional
     @Override
     public void recordReportRequest(String reportName) {
-        log.info("Recording report request for report: {}", reportName);
+        log.info("Запись запроса на отчет: {}", reportName);
 
         ReportRequest reportRequest = reportRequestRepository.findByReportName(reportName)
                 .orElse(ReportRequest.builder()
@@ -40,6 +40,7 @@ public class ReportRequestServiceImpl implements ReportRequestService {
 
         reportRequestRepository.save(reportRequest);
 
-        log.info("Report request for {} recorded successfully", reportName);
+        log.info("Запрос на отчет {} успешно зарегистрирован", reportName);
     }
+
 }

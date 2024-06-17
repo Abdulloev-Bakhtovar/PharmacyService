@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.EmployeeMapper;
+import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
 import ru.bakht.pharmacy.service.model.Employee;
 import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
@@ -16,7 +17,7 @@ import ru.bakht.pharmacy.service.service.EmployeeService;
 import java.util.List;
 
 /**
- * Реализация интерфейса EmployeeService.
+ * Реализация интерфейса {@link EmployeeService} для управления сотрудниками.
  */
 @Slf4j
 @Service
@@ -34,7 +35,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeDto> getAllEmployees() {
-        log.info("Fetching all employees");
+        log.info("Получение всех сотрудников");
         return employeeRepository.findAll().stream()
                 .map(employeeMapper::toDto)
                 .toList();
@@ -46,11 +47,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public EmployeeDto getEmployeeById(Long id) {
-        log.info("Fetching employee with id {}", id);
+        log.info("Получение сотрудника с идентификатором {}", id);
         return employeeRepository.findById(id)
                 .map(employeeMapper::toDto)
                 .orElseThrow(() -> {
-                    log.error("Employee with id {} not found", id);
+                    log.error("Сотрудник с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Сотрудник", id);
                 });
     }
@@ -60,44 +61,40 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
-        log.info("Creating new employee: {}", employeeDto);
+        var id = employeeDto.getId();
 
-        if (employeeDto.getPharmacy().getId() == null) {
-            throw new EntityNotFoundException("Аптека", null);
+        if (id != null && employeeRepository.existsById(id)) {
+            log.info("Сотрудник с идентификатором {} уже существует, обновление сотрудника", id);
+            return updateEmployee(id, employeeDto);
         }
 
         Pharmacy pharmacy = findPharmacyById(employeeDto.getPharmacy().getId());
 
+        log.info("Создание нового сотрудника: {}", employeeDto);
         Employee employee = employeeMapper.toEntity(employeeDto);
         employee.setPharmacy(pharmacy);
         employee = employeeRepository.save(employee);
-
-        log.info("Created employee: {}", employee);
         return employeeMapper.toDto(employee);
     }
+
 
     /**
      * {@inheritDoc}
      */
     @Override
     public EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto) {
-        log.info("Updating employee with id {}: {}", id, employeeDto);
+        log.info("Обновление сотрудника с идентификатором {}: {}", id, employeeDto);
 
         Employee existingEmployee = employeeRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Employee with id {} not found", id);
+                    log.error("Сотрудник с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Сотрудник", id);
                 });
-
-        if (employeeDto.getPharmacy().getId() == null) {
-            throw new EntityNotFoundException("Аптека", null);
-        }
 
         Pharmacy pharmacy = findPharmacyById(employeeDto.getPharmacy().getId());
 
         updateEmployeeFromDto(existingEmployee, employeeDto);
         existingEmployee.setPharmacy(pharmacy);
-
         return employeeMapper.toDto(employeeRepository.save(existingEmployee));
     }
 
@@ -106,17 +103,8 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void deleteEmployeeById(Long id) {
-        log.info("Deleting employee with id {}", id);
-        employeeRepository.findById(id).ifPresentOrElse(
-                employee -> {
-                    employeeRepository.deleteById(id);
-                    log.info("Deleted employee with id {}", id);
-                },
-                () -> {
-                    log.error("Employee with id {} not found", id);
-                    throw new EntityNotFoundException("Сотрудник", id);
-                }
-        );
+        log.info("Удаление сотрудника с идентификатором {}", id);
+        employeeRepository.deleteById(id);
     }
 
     /**
@@ -141,7 +129,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private Pharmacy findPharmacyById(Long pharmacyId) {
         return pharmacyRepository.findById(pharmacyId)
                 .orElseThrow(() -> {
-                    log.error("Pharmacy with id {} not found", pharmacyId);
+                    log.error("Аптека с идентификатором {} не найдена", pharmacyId);
                     return new EntityNotFoundException("Аптека", pharmacyId);
                 });
     }

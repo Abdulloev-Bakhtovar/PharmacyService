@@ -14,7 +14,7 @@ import ru.bakht.pharmacy.service.service.CustomerService;
 import java.util.List;
 
 /**
- * Реализация интерфейса CustomerService.
+ * Реализация интерфейса {@link CustomerService} для управления клиентами.
  */
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional(readOnly = true)
     public List<CustomerDto> getAllCustomers() {
-        log.info("Fetching all customers");
+        log.info("Получение всех клиентов");
         return customerRepository.findAll().stream()
                 .map(customerMapper::toDto)
                 .toList();
@@ -43,11 +43,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Transactional(readOnly = true)
     public CustomerDto getCustomerById(Long id) {
-        log.info("Fetching customer with id {}", id);
+        log.info("Получение клиента с идентификатором {}", id);
         return customerRepository.findById(id)
                 .map(customerMapper::toDto)
                 .orElseThrow(() -> {
-                    log.error("Customer with id {} not found", id);
+                    log.error("Клиент с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Клиент", id);
                 });
     }
@@ -60,13 +60,12 @@ public class CustomerServiceImpl implements CustomerService {
         var id = customerDto.getId();
 
         if (id != null && customerRepository.existsById(id)) {
-            log.info("Customer with id {} already exists, updating customer", id);
+            log.info("Клиент с идентификатором {} уже существует, обновление клиента", id);
             return updateCustomer(id, customerDto);
         }
 
-        log.info("Creating new customer: {}", customerDto);
+        log.info("Создание нового клиента: {}", customerDto);
         var customer = customerRepository.save(customerMapper.toEntity(customerDto));
-        log.info("Created customer: {}", customer);
         return customerMapper.toDto(customer);
     }
 
@@ -75,10 +74,10 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Override
     public CustomerDto updateCustomer(Long id, CustomerDto customerDto) {
-        log.info("Updating customer: {}", customerDto);
+        log.info("Обновление клиента: {}", customerDto);
         var existingCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Customer with id {} not found", id);
+                    log.error("Клиент с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Клиент", id);
                 });
 
@@ -91,17 +90,8 @@ public class CustomerServiceImpl implements CustomerService {
      */
     @Override
     public void deleteCustomerById(Long id) {
-        log.info("Deleting customer with id {}", id);
-        customerRepository.findById(id).ifPresentOrElse(
-                customer -> {
-                    customerRepository.deleteById(id);
-                    log.info("Deleted customer with id {}", id);
-                },
-                () -> {
-                    log.error("Customer with id {} not found", id);
-                    throw new EntityNotFoundException("Клиент", id);
-                }
-        );
+        log.info("Удаление клиента с идентификатором {}", id);
+        customerRepository.deleteById(id);
     }
 
     /**

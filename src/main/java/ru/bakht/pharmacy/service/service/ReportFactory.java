@@ -16,7 +16,7 @@ public class ReportFactory {
         return switch (format.toLowerCase()) {
             case "excel" -> excelReportService;
             case "pdf" -> pdfReportService;
-            default -> throw new IllegalArgumentException("Unknown report format: " + format);
+            default -> throw new IllegalArgumentException("Неизвестный формат отчета: " + format);
         };
     }
 }
