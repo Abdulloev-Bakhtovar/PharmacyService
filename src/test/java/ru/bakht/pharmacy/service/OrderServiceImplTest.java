@@ -17,6 +17,7 @@ import ru.bakht.pharmacy.service.model.enums.Status;
 import ru.bakht.pharmacy.service.repository.*;
 import ru.bakht.pharmacy.service.service.impl.OrderServiceImpl;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class OrderServiceImplTest {
     private PharmacyMedication pharmacyMedication;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
         pharmacy = new Pharmacy(1L, "Аптека №1", "ул. Ленина, 2", "89007654321", null);
         employee = new Employee(1L, "Алексей Смирнов", Position.PHARMACIST, "alexey@example.com", pharmacy);
         customer = new Customer(1L, "Мария Иванова", "ул. Ленина, 1", "89001234567");
@@ -87,6 +88,10 @@ public class OrderServiceImplTest {
         order.setStatus(Status.NEW);
         order.setOrderDate(new Date());
         order.setTotalAmount(200.0);
+
+        Field entityManagerField = OrderServiceImpl.class.getDeclaredField("entityManager");
+        entityManagerField.setAccessible(true);
+        entityManagerField.set(orderService, entityManager);
     }
 
     @Test
@@ -98,7 +103,7 @@ public class OrderServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(orderDto, result.get(0));
+        assertEquals(orderDto, result.getFirst());
         verify(orderRepository, times(1)).findAll();
         verify(orderMapper, times(1)).toDto(any(Order.class));
     }
@@ -129,12 +134,12 @@ public class OrderServiceImplTest {
         verify(orderRepository, times(1)).findById(1L);
     }
 
-    //@Test
+    @Test
     void createOrder_ReturnsOrderDto() {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(customerRepository.existsById(1L)).thenReturn(true);
-        when(pharmacyRepository.existsById(1L)).thenReturn(true);
-        when(medicationRepository.existsById(1L)).thenReturn(true);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
+        when(medicationRepository.findById(1L)).thenReturn(Optional.of(medication));
         when(entityManager.find(eq(PharmacyMedication.class), any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
         when(orderMapper.toEntity(any(OrderDto.class))).thenReturn(order);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
@@ -148,13 +153,13 @@ public class OrderServiceImplTest {
         verify(entityManager, times(1)).merge(any(PharmacyMedication.class));
     }
 
-    //@Test
+    @Test
     void updateOrder_ReturnsOrderDto() {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(customerRepository.existsById(1L)).thenReturn(true);
-        when(pharmacyRepository.existsById(1L)).thenReturn(true);
-        when(medicationRepository.existsById(1L)).thenReturn(true);
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
+        when(medicationRepository.findById(1L)).thenReturn(Optional.of(medication));
         when(entityManager.find(eq(PharmacyMedication.class), any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
@@ -163,9 +168,11 @@ public class OrderServiceImplTest {
 
         assertNotNull(result);
         assertEquals(orderDto, result);
+        verify(orderRepository, times(1)).findById(1L);
         verify(orderRepository, times(1)).save(any(Order.class));
         verify(entityManager, times(1)).merge(any(PharmacyMedication.class));
     }
+
 
     @Test
     void deleteOrderById_Success() {
