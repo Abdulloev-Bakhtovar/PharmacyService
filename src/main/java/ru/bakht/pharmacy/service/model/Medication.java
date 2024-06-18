@@ -3,9 +3,9 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.model.enums.Form;
+import ru.bakht.pharmacy.service.enums.Form;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -32,5 +32,5 @@ public class Medication {
     Double price;
 
     @Column(name = "expiration_date")
-    Date expirationDate;
+    LocalDate expirationDate;
 }

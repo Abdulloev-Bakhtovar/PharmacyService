@@ -3,9 +3,9 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.model.enums.Status;
+import ru.bakht.pharmacy.service.enums.Status;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -44,9 +44,8 @@ public class Order {
     @Column(name = "total_amount")
     Double totalAmount;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "order_date")
-    Date orderDate;
+    LocalDate orderDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

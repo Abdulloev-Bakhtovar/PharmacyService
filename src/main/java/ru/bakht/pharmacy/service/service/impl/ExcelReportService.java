@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+/**
+ * Реализация интерфейса {@link ReportGenerator} для генерации Excel-отчетов.
+ */
 @Slf4j
 @Service
 public class ExcelReportService implements ReportGenerator {
@@ -25,13 +28,13 @@ public class ExcelReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateMedicationsReport(List<MedicationDto> medications) throws IOException {
-        log.info("Generating medications report with {} entries", medications.size());
+        log.info("Генерация отчета о лекарствах с {} записями", medications.size());
 
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Medications");
+        Sheet sheet = workbook.createSheet("Лекарства");
 
         Row headerRow = sheet.createRow(0);
-        String[] columns = {"ID", "Name", "Form", "Price", "Expiration Date"};
+        String[] columns = {"ID", "Наименование", "Форма", "Цена", "Срок годности"};
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(columns[i]);
@@ -52,7 +55,7 @@ public class ExcelReportService implements ReportGenerator {
         workbook.write(outputStream);
         workbook.close();
 
-        log.info("Medications report generated successfully");
+        log.info("Отчет о лекарствах успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -62,13 +65,13 @@ public class ExcelReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateOrdersReport(List<OrderDto> orders) throws IOException {
-        log.info("Generating orders report with {} entries", orders.size());
+        log.info("Генерация отчета о заказах с {} записями", orders.size());
 
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Orders");
+        Sheet sheet = workbook.createSheet("Заказы");
 
         Row headerRow = sheet.createRow(0);
-        String[] columns = {"ID", "Quantity", "Total Amount", "Order Date", "Status"};
+        String[] columns = {"ID", "Количество", "Общая сумма", "Дата заказа", "Статус"};
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(columns[i]);
@@ -89,7 +92,7 @@ public class ExcelReportService implements ReportGenerator {
         workbook.write(outputStream);
         workbook.close();
 
-        log.info("Orders report generated successfully");
+        log.info("Отчет о заказах успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -99,13 +102,13 @@ public class ExcelReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateTotalOrdersReport(TotalOrders totalOrders) throws IOException {
-        log.info("Generating total orders report");
+        log.info("Генерация отчета о общем количестве заказов");
 
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Total Orders");
+        Sheet sheet = workbook.createSheet("Общее количество заказов");
 
         Row headerRow = sheet.createRow(0);
-        String[] columns = {"Total Quantity", "Total Amount"};
+        String[] columns = {"Общее количество", "Общая сумма"};
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(columns[i]);
@@ -119,7 +122,7 @@ public class ExcelReportService implements ReportGenerator {
         workbook.write(outputStream);
         workbook.close();
 
-        log.info("Total orders report generated successfully");
+        log.info("Отчет о общем количестве заказов успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
