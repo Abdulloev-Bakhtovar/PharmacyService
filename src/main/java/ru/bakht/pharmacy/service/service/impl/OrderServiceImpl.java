@@ -15,11 +15,11 @@ import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.repository.*;
 import ru.bakht.pharmacy.service.service.OrderService;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Реализация интерфейса OrderService.
+ * Реализация интерфейса {@link OrderService} для управления заказами.
  */
 @Slf4j
 @Service
@@ -43,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDto> getAllOrders() {
-        log.info("Fetching all orders");
+        log.info("Получение всех заказов");
         return orderRepository.findAll().stream()
                 .map(orderMapper::toDto)
                 .toList();
@@ -55,11 +55,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderDto getOrderById(Long id) {
-        log.info("Fetching order with id {}", id);
+        log.info("Получение заказа с идентификатором {}", id);
         return orderRepository.findById(id)
                 .map(orderMapper::toDto)
                 .orElseThrow(() -> {
-                    log.error("Order with id {} not found", id);
+                    log.error("Заказ с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Заказ", id);
                 });
     }
@@ -69,21 +69,18 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderDto createOrder(OrderDto orderDto) {
-        log.info("Creating new order: {}", orderDto);
-
-        validateRelatedEntities(orderDto);
+        log.info("Создание нового заказа: {}", orderDto);
 
         var order = orderMapper.toEntity(orderDto);
-        setRelatedEntities(order, orderDto);
+        validateAndSetRelatedEntities(order, orderDto);
 
-        order.setOrderDate(new Date());
+        order.setOrderDate(LocalDate.now());
         order.setTotalAmount(orderDto.getQuantity() * order.getMedication().getPrice());
 
         order = orderRepository.save(order);
 
         updatePharmacyMedicationQuantity(orderDto);
 
-        log.info("Created order: {}", order);
         return orderMapper.toDto(order);
     }
 
@@ -92,20 +89,19 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderDto updateOrder(Long id, OrderDto orderDto) {
-        log.info("Updating order with id {}: {}", id, orderDto);
+        log.info("Обновление заказа с идентификатором {}: {}", id, orderDto);
 
         var existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Order with id {} not found", id);
+                    log.error("Заказ с идентификатором {} не найден", id);
                     return new EntityNotFoundException("Заказ", id);
                 });
 
-        validateRelatedEntities(orderDto);
-        updateOrderFromDto(existingOrder, orderDto);
-        setRelatedEntities(existingOrder, orderDto);
-
-        existingOrder.setOrderDate(new Date());
+        orderMapper.updateEntityFromDto(orderDto, existingOrder);
+        existingOrder.setOrderDate(LocalDate.now());
         existingOrder.setTotalAmount(orderDto.getQuantity() * existingOrder.getMedication().getPrice());
+
+        validateAndSetRelatedEntities(existingOrder, orderDto);
 
         updatePharmacyMedicationQuantity(orderDto);
 
@@ -117,36 +113,18 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void deleteOrderById(Long id) {
-        log.info("Deleting order with id {}", id);
-        orderRepository.findById(id).ifPresentOrElse(
-                order -> {
-                    orderRepository.deleteById(id);
-                    log.info("Deleted order with id {}", id);
-                },
-                () -> {
-                    log.error("Order with id {} not found", id);
-                    throw new EntityNotFoundException("Заказ", id);
-                }
-        );
-    }
-
-    /**
-     * Обновляет информацию о заказе на основе данных из DTO.
-     *
-     * @param order объект Order, который необходимо обновить
-     * @param orderDto объект OrderDto с новыми данными
-     */
-    private void updateOrderFromDto(Order order, OrderDto orderDto) {
-        order.setQuantity(orderDto.getQuantity());
-        order.setStatus(orderDto.getStatus());
+        log.info("Удаление заказа с идентификатором {}", id);
+        orderRepository.deleteById(id);
     }
 
     /**
      * Проверяет наличие связанных сущностей по их идентификаторам в DTO.
+     * и устанавливает связанные сущности в объекте Order на основе данных из DTO.
      *
-     * @param orderDto объект OrderDto
+     * @param order объект Order, который необходимо обновить
+     * @param orderDto объект OrderDto с новыми данными
      */
-    private void validateRelatedEntities(OrderDto orderDto) {
+    private void validateAndSetRelatedEntities(Order order, OrderDto orderDto) {
         Long employeeId = orderDto.getEmployeeDto().getId();
         Long customerId = orderDto.getCustomerDto().getId();
         Long pharmacyId = orderDto.getPharmacyDto().getId();
@@ -154,15 +132,12 @@ public class OrderServiceImpl implements OrderService {
 
         var employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Сотрудник", employeeId));
-        if (!customerRepository.existsById(customerId)) {
-            throw new EntityNotFoundException("Покупатель", customerId);
-        }
-        if (!pharmacyRepository.existsById(pharmacyId)) {
-            throw new EntityNotFoundException("Аптека", pharmacyId);
-        }
-        if (!medicationRepository.existsById(medicationId)) {
-            throw new EntityNotFoundException("Лекарство", medicationId);
-        }
+        var customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Покупатель", customerId));
+        var pharmacy  = pharmacyRepository.findById(pharmacyId)
+                .orElseThrow(() -> new EntityNotFoundException("Аптека", pharmacyId));
+        var medication = medicationRepository.findById(medicationId)
+                .orElseThrow(() ->new EntityNotFoundException("Лекарство", medicationId));
         var pharmacyMedication = entityManager.find(PharmacyMedication.class, new PharmacyMedicationId(pharmacyId, medicationId));
         if (pharmacyMedication == null) {
             throw new EntityNotFoundException("Связь между аптекой и лекарством", pharmacyId, medicationId);
@@ -174,23 +149,11 @@ public class OrderServiceImpl implements OrderService {
         if (!employee.getPharmacy().getId().equals(pharmacyId)) {
             throw new EntityNotFoundException("Сотрудник не работает в указанной аптеке", employeeId);
         }
-    }
 
-    /**
-     * Устанавливает связанные сущности в объекте Order на основе данных из DTO.
-     *
-     * @param order объект Order, который необходимо обновить
-     * @param orderDto объект OrderDto с новыми данными
-     */
-    private void setRelatedEntities(Order order, OrderDto orderDto) {
-        order.setEmployee(employeeRepository.findById(orderDto.getEmployeeDto().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Сотрудник", orderDto.getEmployeeDto().getId())));
-        order.setCustomer(customerRepository.findById(orderDto.getCustomerDto().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Покупатель", orderDto.getCustomerDto().getId())));
-        order.setPharmacy(pharmacyRepository.findById(orderDto.getPharmacyDto().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Аптека", orderDto.getPharmacyDto().getId())));
-        order.setMedication(medicationRepository.findById(orderDto.getMedicationDto().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Лекарство", orderDto.getMedicationDto().getId())));
+        order.setEmployee(employee);
+        order.setCustomer(customer);
+        order.setPharmacy(pharmacy);
+        order.setMedication(medication);
     }
 
     /**
