@@ -3,7 +3,7 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.model.enums.Status;
+import ru.bakht.pharmacy.service.enums.Status;
 
 import java.time.LocalDate;
 

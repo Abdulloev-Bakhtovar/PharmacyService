@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.model.enums.Position;
+import ru.bakht.pharmacy.service.enums.Position;
 
 @Data
 @NoArgsConstructor

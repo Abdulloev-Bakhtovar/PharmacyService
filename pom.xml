@@ -16,6 +16,9 @@
     <properties>
         <java.version>21</java.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <itextpdf.version>8.0.4</itextpdf.version>
+        <apache.poi.version>5.2.5</apache.poi.version>
+        <integration-redis.version>6.3.0</integration-redis.version>
     </properties>
     <dependencies>
         <dependency>
@@ -62,6 +65,30 @@
             <artifactId>mapstruct-processor</artifactId>
             <version>${mapstruct.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${apache.poi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-core</artifactId>
+            <version>${itextpdf.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-redis</artifactId>
+            <version>${integration-redis.version}</version>
         </dependency>
     </dependencies>
 
