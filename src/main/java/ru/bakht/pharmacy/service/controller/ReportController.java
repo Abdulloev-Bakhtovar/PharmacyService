@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import ru.bakht.pharmacy.service.enums.Format;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
@@ -93,7 +94,7 @@ public class ReportController {
     @Operation(summary = "Экспортировать медикаменты по ID аптеки",
             description = "Экспортирует список медикаментов, доступных в конкретной аптеке")
     public ResponseEntity<byte[]> exportMedicationsByPharmacy(@PathVariable Long pharmacyId,
-                                                              @RequestParam String format) throws IOException {
+                                                              @RequestParam Format format) throws IOException {
         log.info("Получен запрос на экспорт медикаментов для аптеки с id {} в формате {}", pharmacyId, format);
         List<MedicationDto> medications = reportService.getMedicationsByPharmacy(pharmacyId);
         ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
@@ -111,7 +112,7 @@ public class ReportController {
             description = "Экспортирует общее количество и общую стоимость всех заказов за указанный период")
     public ResponseEntity<byte[]> exportTotalQuantityAndAmount(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
                                                                @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
-                                                               @RequestParam String format) throws IOException {
+                                                               @RequestParam Format format) throws IOException {
         log.info("Получен запрос на экспорт общего количества и стоимости заказов с {} по {} в формате {}", startDate, endDate, format);
         TotalOrders totalOrders = reportService.getTotalQuantityAndAmount(startDate, endDate);
         ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
@@ -128,7 +129,7 @@ public class ReportController {
     @Operation(summary = "Экспортировать заказы по телефону клиента",
             description = "Экспортирует список заказов, сделанных конкретным клиентом по его номеру телефона")
     public ResponseEntity<byte[]> exportOrdersByCustomerPhone(@RequestParam String phone,
-                                                              @RequestParam String format) throws IOException {
+                                                              @RequestParam Format format) throws IOException {
         log.info("Получен запрос на экспорт заказов для клиента с телефоном {} в формате {}", phone, format);
         List<OrderDto> orders = reportService.getOrdersByCustomerPhone(phone);
         ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
@@ -145,7 +146,7 @@ public class ReportController {
     @Operation(summary = "Экспортировать медикаменты, закончившиеся на складе в определенной аптеке",
             description = "Экспортирует список медикаментов, которые закончились на складе в определенной аптеке")
     public ResponseEntity<byte[]> exportOutOfStockMedicationsByPharmacy(@PathVariable Long pharmacyId,
-                                                                        @RequestParam String format) throws IOException {
+                                                                        @RequestParam Format format) throws IOException {
         log.info("Получен запрос на экспорт медикаментов, закончившихся на складе для аптеки с id {} в формате {}", pharmacyId, format);
         List<MedicationDto> medications = reportService.getOutOfStockMedicationsByPharmacy(pharmacyId);
         ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);

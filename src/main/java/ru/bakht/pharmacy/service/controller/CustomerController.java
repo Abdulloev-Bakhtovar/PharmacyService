@@ -27,7 +27,7 @@ public class CustomerController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('client_admin')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
     @Operation(summary = "Получить всех клиентов", description = "Возвращает список всех клиентов")
     public List<CustomerDto> getAllCustomers() {
         log.info("Получен запрос на получение всех клиентов");
