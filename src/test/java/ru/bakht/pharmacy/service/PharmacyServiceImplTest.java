@@ -50,7 +50,7 @@ public class PharmacyServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(pharmacyDto, result.get(0));
+        assertEquals(pharmacyDto, result.getFirst());
         verify(pharmacyRepository, times(1)).findAll();
         verify(pharmacyMapper, times(1)).toDto(any(Pharmacy.class));
     }
@@ -124,26 +124,11 @@ public class PharmacyServiceImplTest {
     }
 
     @Test
-    void deletePharmacyById_Success() {
-        when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
-        doNothing().when(pharmacyRepository).deleteById(1L);
+    void deletePharmacyById_SuccessfulDeletion() {
+        Long pharmacyId = 10L;
 
-        pharmacyService.deletePharmacyById(1L);
+        pharmacyService.deletePharmacyById(pharmacyId);
 
-        verify(pharmacyRepository, times(1)).findById(1L);
-        verify(pharmacyRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void deletePharmacyById_ThrowsEntityNotFoundException() {
-        when(pharmacyRepository.findById(1L)).thenReturn(Optional.empty());
-
-        EntityNotFoundException thrown = assertThrows(
-                EntityNotFoundException.class,
-                () -> pharmacyService.deletePharmacyById(1L)
-        );
-
-        assertTrue(thrown.getMessage().contains("Аптека"));
-        verify(pharmacyRepository, times(1)).findById(1L);
+        verify(pharmacyRepository, times(1)).deleteById(pharmacyId);
     }
 }

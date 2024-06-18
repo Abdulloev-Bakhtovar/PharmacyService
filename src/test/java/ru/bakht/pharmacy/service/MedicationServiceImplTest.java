@@ -6,11 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.bakht.pharmacy.service.enums.Form;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.MedicationMapper;
 import ru.bakht.pharmacy.service.model.Medication;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
-import ru.bakht.pharmacy.service.model.enums.Form;
 import ru.bakht.pharmacy.service.repository.MedicationRepository;
 import ru.bakht.pharmacy.service.service.impl.MedicationServiceImpl;
 
@@ -45,10 +45,10 @@ class MedicationServiceImplTest {
         List<MedicationDto> medications = medicationService.getAllMedications();
 
         assertEquals(1, medications.size());
-        assertEquals(1L, medications.get(0).getId());
-        assertEquals("Aspirin", medications.get(0).getName());
-        assertEquals(Form.TABLET, medications.get(0).getForm());
-        assertEquals(100.0, medications.get(0).getPrice());
+        assertEquals(1L, medications.getFirst().getId());
+        assertEquals("Aspirin", medications.getFirst().getName());
+        assertEquals(Form.TABLET, medications.getFirst().getForm());
+        assertEquals(100.0, medications.getFirst().getPrice());
 
         verify(medicationRepository, times(1)).findAll();
         verify(medicationMapper, times(1)).toDto(any(Medication.class));
@@ -137,16 +137,12 @@ class MedicationServiceImplTest {
     }
 
     @Test
-    void deleteMedicationById() {
-        Medication existingMedication = new Medication(1L, "Aspirin", Form.TABLET, 100.0, null);
+    void deleteMedicationById_SuccessfulDeletion() {
+        Long medicationId = 10L;
 
-        when(medicationRepository.findById(1L)).thenReturn(Optional.of(existingMedication));
-        doNothing().when(medicationRepository).deleteById(1L);
+        medicationService.deleteMedicationById(medicationId);
 
-        medicationService.deleteMedicationById(1L);
-
-        verify(medicationRepository, times(1)).findById(1L);
-        verify(medicationRepository, times(1)).deleteById(1L);
+        verify(medicationRepository, times(1)).deleteById(medicationId);
     }
 
 }

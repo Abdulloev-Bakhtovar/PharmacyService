@@ -2,6 +2,7 @@ package ru.bakht.pharmacy.service.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.bakht.pharmacy.service.enums.Format;
 import ru.bakht.pharmacy.service.service.impl.ExcelReportService;
 import ru.bakht.pharmacy.service.service.impl.PdfReportService;
 
@@ -12,12 +13,10 @@ public class ReportFactory {
     private final ExcelReportService excelReportService;
     private final PdfReportService pdfReportService;
 
-    public ReportGenerator getReportGenerator(String format) {
-        return switch (format.toLowerCase()) {
-            case "excel" -> excelReportService;
-            case "pdf" -> pdfReportService;
-            default -> throw new IllegalArgumentException("Unknown report format: " + format);
+    public ReportGenerator getReportGenerator(Format format) {
+        return switch (format) {
+            case EXCEL -> excelReportService;
+            case PDF -> pdfReportService;
         };
     }
 }
-

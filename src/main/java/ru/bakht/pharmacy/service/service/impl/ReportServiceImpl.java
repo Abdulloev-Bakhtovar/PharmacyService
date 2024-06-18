@@ -35,47 +35,43 @@ public class ReportServiceImpl implements ReportService {
      * {@inheritDoc}
      */
     public List<MedicationDto> getMedicationsByPharmacy(Long pharmacyId) {
-        log.info("Received request to get medications for pharmacy with id {}", pharmacyId);
-        List<MedicationDto> medications = mapToDto(
+        log.info("Получен запрос на получение лекарств для аптеки с id {}", pharmacyId);
+
+        return mapToDto(
                 medicationRepository.findMedicationsByPharmacyId(pharmacyId), medicationMapper::toDto);
-        log.info("Returning {} medications for pharmacy with id {}", medications.size(), pharmacyId);
-        return medications;
     }
 
     /**
      * {@inheritDoc}
      */
     public TotalOrders getTotalQuantityAndAmount(Date startDate, Date endDate) {
-        log.info("Received request to get total quantity and amount of orders from {} to {}", startDate, endDate);
+        log.info("Получен запрос на получение общего количества и суммы заказов с {} по {}", startDate, endDate);
+
         TotalOrdersProjection projection = orderRepository.findTotalQuantityAndAmountByDateRange(startDate, endDate);
         Integer totalQuantity = (projection.getTotalQuantity() != null) ? projection.getTotalQuantity() : 0;
         Double totalAmount = (projection.getTotalAmount() != null) ? projection.getTotalAmount() : 0.0;
-        TotalOrders totalOrders = new TotalOrders(totalQuantity, totalAmount);
-        log.info("Returning total quantity: {}, total amount: {}",
-                totalOrders.getTotalQuantity(), totalOrders.getTotalAmount());
-        return totalOrders;
+        return new TotalOrders(totalQuantity, totalAmount);
     }
 
     /**
      * {@inheritDoc}
      */
     public List<OrderDto> getOrdersByCustomerPhone(String phone) {
-        log.info("Received request to get orders for customer with phone {}", phone);
-        List<OrderDto> orders = mapToDto(orderRepository.findOrdersByCustomerPhone(phone), orderMapper::toDto);
-        log.info("Returning {} orders for customer with phone {}", orders.size(), phone);
-        return orders;
+        log.info("Получен запрос на получение заказов для клиента с телефоном {}", phone);
+
+        return mapToDto(orderRepository.findOrdersByCustomerPhone(phone), orderMapper::toDto);
     }
 
     /**
      * {@inheritDoc}
      */
     public List<MedicationDto> getOutOfStockMedicationsByPharmacy(Long pharmacyId) {
-        log.info("Received request to get out of stock medications for pharmacy with id {}", pharmacyId);
-        List<MedicationDto> medications = mapToDto(
-                medicationRepository.findOutOfStockMedicationsByPharmacyId(pharmacyId), medicationMapper::toDto);
-        log.info("Returning {} out of stock medications for pharmacy with id {}", medications.size(), pharmacyId);
-        return medications;
+        log.info("Получен запрос на получение отсутствующих лекарств для аптеки с id {}", pharmacyId);
+
+        return mapToDto(medicationRepository.findOutOfStockMedicationsByPharmacyId(pharmacyId),
+                medicationMapper::toDto);
     }
+
 
     /**
      * Универсальный метод для маппинга сущностей в DTO.

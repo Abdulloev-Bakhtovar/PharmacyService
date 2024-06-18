@@ -21,7 +21,7 @@ import ru.bakht.pharmacy.service.service.PharmacyService;
 import java.util.List;
 
 /**
- * Реализация интерфейса PharmacyService.
+ * Реализация интерфейса {@link PharmacyService} для управления данными об аптеках.
  */
 @Slf4j
 @Service
@@ -42,7 +42,7 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Override
     @Transactional(readOnly = true)
     public List<PharmacyDto> getAllPharmacies() {
-        log.info("Fetching all pharmacies");
+        log.info("Получение списка всех аптек");
         return pharmacyRepository.findAll().stream()
                 .map(pharmacyMapper::toDto)
                 .toList();
@@ -54,11 +54,11 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Override
     @Transactional(readOnly = true)
     public PharmacyDto getPharmacyById(Long id) {
-        log.info("Fetching pharmacy with id {}", id);
+        log.info("Получение аптеки с id {}", id);
         return pharmacyRepository.findById(id)
                 .map(pharmacyMapper::toDto)
                 .orElseThrow(() -> {
-                    log.error("Pharmacy with id {} not found", id);
+                    log.error("Аптека с id {} не найдена", id);
                     return new EntityNotFoundException("Аптека", id);
                 });
     }
@@ -71,13 +71,12 @@ public class PharmacyServiceImpl implements PharmacyService {
         var id = pharmacyDto.getId();
 
         if (id != null && pharmacyRepository.existsById(id)) {
-            log.info("Pharmacy with id {} already exists, updating pharmacy", id);
+            log.info("Аптека с id {} уже существует, выполняется обновление данных", id);
             return updatePharmacy(id, pharmacyDto);
         }
 
-        log.info("Creating new pharmacy: {}", pharmacyDto);
+        log.info("Создание новой аптеки: {}", pharmacyDto);
         var pharmacy = pharmacyRepository.save(pharmacyMapper.toEntity(pharmacyDto));
-        log.info("Created pharmacy: {}", pharmacy);
         return pharmacyMapper.toDto(pharmacy);
     }
 
@@ -86,14 +85,14 @@ public class PharmacyServiceImpl implements PharmacyService {
      */
     @Override
     public PharmacyDto updatePharmacy(Long id, PharmacyDto pharmacyDto) {
-        log.info("Updating pharmacy: {}", pharmacyDto);
+        log.info("Обновление данных аптеки: {}", pharmacyDto);
         var existingPharmacy = pharmacyRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Pharmacy with id {} not found", id);
+                    log.error("Аптека с id {} не найдена", id);
                     return new EntityNotFoundException("Аптека", id);
                 });
 
-        updatePharmacyFromDto(existingPharmacy, pharmacyDto);
+        pharmacyMapper.updateEntityFromDto(pharmacyDto, existingPharmacy);
         return pharmacyMapper.toDto(pharmacyRepository.save(existingPharmacy));
     }
 
@@ -102,24 +101,15 @@ public class PharmacyServiceImpl implements PharmacyService {
      */
     @Override
     public void deletePharmacyById(Long id) {
-        log.info("Deleting pharmacy with id {}", id);
-        pharmacyRepository.findById(id).ifPresentOrElse(
-                pharmacy -> {
-                    pharmacyRepository.deleteById(id);
-                    log.info("Deleted pharmacy with id {}", id);
-                },
-                () -> {
-                    log.error("Pharmacy with id {} not found", id);
-                    throw new EntityNotFoundException("Аптека", id);
-                }
-        );
+        log.info("Удаление аптеки с id {}", id);
+        pharmacyRepository.deleteById(id);
     }
 
     /**
      * {@inheritDoc}
      */
     public void addMedication(PharmacyMedicationDto pharmacyMedicationDto) {
-        log.info("Creating or updating medication in pharmacy: {}", pharmacyMedicationDto);
+        log.info("Создание или обновление записи о лекарстве в аптеке: {}", pharmacyMedicationDto);
 
         var pharmacyDto = getPharmacyById(pharmacyMedicationDto.getPharmacyDto().getId());
         var pharmacy = pharmacyMapper.toEntity(pharmacyDto);
@@ -129,7 +119,7 @@ public class PharmacyServiceImpl implements PharmacyService {
         var existingPharmacyMedication = entityManager.find(PharmacyMedication.class, pharmacyMedicationId);
 
         if (existingPharmacyMedication != null) {
-            log.info("PharmacyMedication with pharmacyId {} and medicationId {} already exists, updating quantity",
+            log.info("Запись PharmacyMedication с pharmacyId {} и medicationId {} уже существует, обновление количества",
                     pharmacy.getId(), medication.getId());
             existingPharmacyMedication.setQuantity(pharmacyMedicationDto.getQuantity());
             entityManager.merge(existingPharmacyMedication);
@@ -141,7 +131,6 @@ public class PharmacyServiceImpl implements PharmacyService {
                     .quantity(pharmacyMedicationDto.getQuantity())
                     .build();
             entityManager.persist(pharmacyMedication);
-            log.info("Created new medication: {} in pharmacy: {}", medication, pharmacy);
         }
     }
 
@@ -149,70 +138,55 @@ public class PharmacyServiceImpl implements PharmacyService {
      * {@inheritDoc}
      */
     public void updateMedication(PharmacyMedicationDto pharmacyMedicationDto) {
-        log.info("Updating medication in pharmacy: {}", pharmacyMedicationDto);
+        log.info("Обновление данных о лекарстве в аптеке: {}", pharmacyMedicationDto);
 
-        var pharmacyMedicationId = new PharmacyMedicationId(
-                pharmacyMedicationDto.getPharmacyDto().getId(),
-                pharmacyMedicationDto.getMedicationDto().getId()
-        );
+        var pharmacyId = pharmacyMedicationDto.getPharmacyDto().getId();
+        var medicationId = pharmacyMedicationDto.getMedicationDto().getId();
+        var pharmacyMedicationId = new PharmacyMedicationId(pharmacyId, medicationId);
 
         var existingPharmacyMedication = entityManager.find(PharmacyMedication.class, pharmacyMedicationId);
 
         if (existingPharmacyMedication == null) {
-            log.error("PharmacyMedication with pharmacyId {} and medicationId {} not found",
-                    pharmacyMedicationDto.getPharmacyDto().getId(),
-                    pharmacyMedicationDto.getMedicationDto().getId());
-            throw new EntityNotFoundException("Запись PharmacyMedication",
-                    pharmacyMedicationDto.getPharmacyDto().getId(), pharmacyMedicationDto.getMedicationDto().getId());
+            log.error("Запись PharmacyMedication с pharmacyId {} и medicationId {} не найдена",
+                    pharmacyId, medicationId);
+            throw new EntityNotFoundException("Запись PharmacyMedication", pharmacyId, medicationId);
         }
 
         existingPharmacyMedication.setQuantity(pharmacyMedicationDto.getQuantity());
         entityManager.merge(existingPharmacyMedication);
-        log.info("Updated medication: {} in pharmacy: {}", pharmacyMedicationDto.getMedicationDto(), pharmacyMedicationDto.getPharmacyDto());
     }
 
     /**
      * {@inheritDoc}
      */
     public void removeMedication(PharmacyMedicationDto pharmacyMedicationDto) {
-        log.info("Removing medication from pharmacy: {}", pharmacyMedicationDto);
+        log.info("Удаление лекарства из аптеки: {}", pharmacyMedicationDto);
 
-        var pharmacyMedicationId = new PharmacyMedicationId(
-                pharmacyMedicationDto.getPharmacyDto().getId(),
-                pharmacyMedicationDto.getMedicationDto().getId()
-        );
+        var pharmacyId = pharmacyMedicationDto.getPharmacyDto().getId();
+        var medicationId = pharmacyMedicationDto.getMedicationDto().getId();
+        var pharmacyMedicationId = new PharmacyMedicationId(pharmacyId, medicationId);
 
         var pharmacyMedication = entityManager.find(PharmacyMedication.class, pharmacyMedicationId);
         if (pharmacyMedication == null) {
-            log.error("PharmacyMedication with pharmacyId {} and medicationId {} not found",
-                    pharmacyMedicationDto.getPharmacyDto().getId(),
-                    pharmacyMedicationDto.getMedicationDto().getId());
-            throw new EntityNotFoundException("Запись PharmacyMedication",
-                    pharmacyMedicationDto.getPharmacyDto().getId(), pharmacyMedicationDto.getMedicationDto().getId());
+            log.error("Запись PharmacyMedication с pharmacyId {} и medicationId {} не найдена",
+                    pharmacyId, medicationId);
+            throw new EntityNotFoundException("Запись PharmacyMedication", pharmacyId, medicationId);
         }
 
         entityManager.remove(pharmacyMedication);
-        log.info("Removed medication with id {} from pharmacy with id {}",
-                pharmacyMedicationDto.getMedicationDto().getId(),
-                pharmacyMedicationDto.getPharmacyDto().getId());
     }
 
     /**
-     * Обновляет информацию об аптеке на основе данных из DTO.
+     * Получает лекарство по его идентификатору.
      *
-     * @param pharmacy объект Pharmacy, который необходимо обновить
-     * @param pharmacyDto объект PharmacyDto с новыми данными
+     * @param id идентификатор лекарства
+     * @return объект Medication
+     * @throws EntityNotFoundException если лекарство не найдено
      */
-    private void updatePharmacyFromDto(Pharmacy pharmacy, PharmacyDto pharmacyDto) {
-        pharmacy.setName(pharmacyDto.getName());
-        pharmacy.setAddress(pharmacyDto.getAddress());
-        pharmacy.setPhone(pharmacyDto.getPhone());
-    }
-
     private Medication getMedicationById(Long id) {
         return medicationRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Medication with id {} not found", id);
+                    log.error("Лекарство с id {} не найдено", id);
                     return new EntityNotFoundException("Лекарство", id);
                 });
     }

@@ -28,20 +28,20 @@ public class PdfReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateMedicationsReport(List<MedicationDto> medications) throws IOException {
-        log.info("Generating medications PDF report with {} entries", medications.size());
+        log.info("Генерация PDF-отчета по лекарствам с {} записями", medications.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
 
-        document.add(new Paragraph("Medications Report"));
+        document.add(new Paragraph("Отчет по лекарствам"));
         Table table = new Table(new float[]{1, 3, 2, 2, 3});
         table.addHeaderCell("ID");
-        table.addHeaderCell("Name");
-        table.addHeaderCell("Form");
-        table.addHeaderCell("Price");
-        table.addHeaderCell("Expiration Date");
+        table.addHeaderCell("Наименование");
+        table.addHeaderCell("Форма");
+        table.addHeaderCell("Цена");
+        table.addHeaderCell("Дата истечения срока");
 
         for (MedicationDto medication : medications) {
             table.addCell(medication.getId().toString());
@@ -54,7 +54,7 @@ public class PdfReportService implements ReportGenerator {
         document.add(table);
         document.close();
 
-        log.info("Medications PDF report generated successfully");
+        log.info("PDF-отчет по лекарствам успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -64,20 +64,20 @@ public class PdfReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateOrdersReport(List<OrderDto> orders) throws IOException {
-        log.info("Generating orders PDF report with {} entries", orders.size());
+        log.info("Генерация PDF-отчета по заказам с {} записями", orders.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
 
-        document.add(new Paragraph("Orders Report"));
+        document.add(new Paragraph("Отчет по заказам"));
         Table table = new Table(new float[]{1, 2, 2, 3, 2});
         table.addHeaderCell("ID");
-        table.addHeaderCell("Quantity");
-        table.addHeaderCell("Total Amount");
-        table.addHeaderCell("Order Date");
-        table.addHeaderCell("Status");
+        table.addHeaderCell("Количество");
+        table.addHeaderCell("Общая сумма");
+        table.addHeaderCell("Дата заказа");
+        table.addHeaderCell("Статус");
 
         for (OrderDto order : orders) {
             table.addCell(order.getId().toString());
@@ -90,7 +90,7 @@ public class PdfReportService implements ReportGenerator {
         document.add(table);
         document.close();
 
-        log.info("Orders PDF report generated successfully");
+        log.info("PDF-отчет по заказам успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -100,17 +100,17 @@ public class PdfReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateTotalOrdersReport(TotalOrders totalOrders) throws IOException {
-        log.info("Generating total orders PDF report");
+        log.info("Генерация PDF-отчета по общему числу заказов");
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
 
-        document.add(new Paragraph("Total Orders Report"));
+        document.add(new Paragraph("Отчет по общему числу заказов"));
         Table table = new Table(new float[]{2, 2});
-        table.addHeaderCell("Total Quantity");
-        table.addHeaderCell("Total Amount");
+        table.addHeaderCell("Общее количество");
+        table.addHeaderCell("Общая сумма");
 
         table.addCell(totalOrders.getTotalQuantity().toString());
         table.addCell(totalOrders.getTotalAmount().toString());
@@ -118,7 +118,7 @@ public class PdfReportService implements ReportGenerator {
         document.add(table);
         document.close();
 
-        log.info("Total orders PDF report generated successfully");
+        log.info("PDF-отчет по общему числу заказов успешно сгенерирован");
 
         return outputStream.toByteArray();
     }

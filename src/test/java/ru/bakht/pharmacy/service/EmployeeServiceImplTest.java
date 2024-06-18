@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.bakht.pharmacy.service.enums.Position;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.EmployeeMapper;
 import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
@@ -13,9 +14,8 @@ import ru.bakht.pharmacy.service.model.Employee;
 import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
 import ru.bakht.pharmacy.service.model.dto.PharmacyDto;
-import ru.bakht.pharmacy.service.model.enums.Position;
 import ru.bakht.pharmacy.service.repository.EmployeeRepository;
-import ru.bakht.pharmacy.service.repository.PharmacyRepository;
+import ru.bakht.pharmacy.service.service.PharmacyService;
 import ru.bakht.pharmacy.service.service.impl.EmployeeServiceImpl;
 
 import java.util.List;
@@ -33,7 +33,7 @@ class EmployeeServiceImplTest {
     private EmployeeRepository employeeRepository;
 
     @Mock
-    private PharmacyRepository pharmacyRepository;
+    private PharmacyService pharmacyService;
 
     @Mock
     private EmployeeMapper employeeMapper;
@@ -56,10 +56,10 @@ class EmployeeServiceImplTest {
         List<EmployeeDto> employees = employeeService.getAllEmployees();
 
         assertEquals(1, employees.size());
-        assertEquals(1L, employees.get(0).getId());
-        assertEquals("Ivan Ivanov", employees.get(0).getName());
-        assertEquals(Position.PHARMACIST, employees.get(0).getPosition());
-        assertEquals("ivanov@example.com", employees.get(0).getEmail());
+        assertEquals(1L, employees.getFirst().getId());
+        assertEquals("Ivan Ivanov", employees.getFirst().getName());
+        assertEquals(Position.PHARMACIST, employees.getFirst().getPosition());
+        assertEquals("ivanov@example.com", employees.getFirst().getEmail());
 
         verify(employeeRepository, times(1)).findAll();
         verify(employeeMapper, times(1)).toDto(any(Employee.class));
@@ -113,7 +113,7 @@ class EmployeeServiceImplTest {
         when(employeeMapper.toEntity(any(EmployeeDto.class))).thenReturn(employee);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
         when(employeeMapper.toDto(any(Employee.class))).thenReturn(savedEmployeeDto);
-        when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
+        when(pharmacyService.getPharmacyById(1L)).thenReturn(pharmacyDto);
 
         EmployeeDto createdEmployee = employeeService.createEmployee(employeeDto);
 
@@ -125,7 +125,7 @@ class EmployeeServiceImplTest {
         verify(employeeMapper, times(1)).toEntity(any(EmployeeDto.class));
         verify(employeeRepository, times(1)).save(any(Employee.class));
         verify(employeeMapper, times(1)).toDto(any(Employee.class));
-        verify(pharmacyRepository, times(1)).findById(1L);
+        verify(pharmacyService, times(1)).getPharmacyById(1L);
     }
 
 
@@ -141,7 +141,7 @@ class EmployeeServiceImplTest {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(existingEmployee));
         when(employeeRepository.save(any(Employee.class))).thenReturn(updatedEmployee);
         when(employeeMapper.toDto(any(Employee.class))).thenReturn(updatedEmployeeDto);
-        when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
+        when(pharmacyService.getPharmacyById(1L)).thenReturn(pharmacyDto);
 
         EmployeeDto result = employeeService.updateEmployee(1L, employeeDto);
 
@@ -155,15 +155,11 @@ class EmployeeServiceImplTest {
 
 
     @Test
-    void deleteEmployeeById() {
-        Employee existingEmployee = new Employee(1L, "Ivan Ivanov", Position.PHARMACIST, "ivanov@example.com", new Pharmacy());
+    void deleteCustomerById_SuccessfulDeletion() {
+        Long employeeId = 1L;
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(existingEmployee));
-        doNothing().when(employeeRepository).deleteById(1L);
+        employeeService.deleteEmployeeById(employeeId);
 
-        employeeService.deleteEmployeeById(1L);
-
-        verify(employeeRepository, times(1)).findById(1L);
-        verify(employeeRepository, times(1)).deleteById(1L);
+        verify(employeeRepository, times(1)).deleteById(employeeId);
     }
 }

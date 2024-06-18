@@ -32,7 +32,7 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     private final JavaMailSender mailSender;
     private final RedisLockRegistry redisLockRegistry;
 
-    private static final int THRESHOLD = 10;
+    private static final int THRESHOLD = 10; // минимальная количества медикаментов
 
     /**
      * {@inheritDoc}
@@ -44,7 +44,7 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
 
         try {
             if (lock.tryLock()) {
-                log.info("Starting inventory check...");
+                log.info("Начало проверки запасов медикаментов...");
 
                 List<PharmacyMedication> lowStockMedications =
                         medicationRepository.findMedicationsBelowThreshold(THRESHOLD);
@@ -53,17 +53,19 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
                     sendNotifications(lowStockMedications);
                 }
 
-                log.info("Inventory check completed.");
+                log.info("Проверка запасов медикаментов завершена.");
             } else {
-                log.info("Another instance is already performing the inventory check.");
+                log.info("Другой экземпляр уже выполняет проверку запасов медикаментов.");
             }
         } catch (Exception e) {
-            log.error("Error during inventory check", e);
+            log.error("Ошибка во время проверки запасов медикаментов", e);
+
         } finally {
             try {
                 lock.unlock();
             } catch (IllegalStateException e) {
-                log.warn("Failed to release the lock. The lock is not held by this instance.", e);
+                log.warn("Не удалось освободить блокировку. "
+                        + "Блокировка не удерживается этим экземпляром.", e);
             }
         }
     }
@@ -78,22 +80,22 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
                 .forEach((pharmacyId, pharmacyMedications) -> {
                     List<Employee> employees = employeeRepository.findByPharmacyId(pharmacyId);
                     employees.forEach(employee -> {
-                        String subject = "Low Stock Medication Notification";
-                        StringBuilder message = new StringBuilder("The following medications have low stock:\n\n");
+                        String subject = "Уведомление о низком запасе медикаментов";
+                        StringBuilder message = new StringBuilder("Следующие медикаменты имеют низкий запас:\n\n");
 
                         for (PharmacyMedication pm : pharmacyMedications) {
                             message.append("ID: ").append(pm.getMedication().getId())
-                                    .append(", Name: ").append(pm.getMedication().getName())
-                                    .append(", Form: ").append(pm.getMedication().getForm().name())
-                                    .append(", Price: ").append(pm.getMedication().getPrice())
-                                    .append(", Quantity: ").append(pm.getQuantity())
+                                    .append(", Наименование: ").append(pm.getMedication().getName())
+                                    .append(", Форма выпуска: ").append(pm.getMedication().getForm().name())
+                                    .append(", Цена: ").append(pm.getMedication().getPrice())
+                                    .append(", Количество: ").append(pm.getQuantity())
                                     .append("\n");
                         }
 
                         try {
                             sendEmail(employee.getEmail(), subject, message.toString());
                         } catch (MessagingException e) {
-                            log.error("Failed to send low stock notification to {}", employee.getEmail(), e);
+                            log.error("Не удалось отправить уведомление о низком запасе на почту {}", employee.getEmail(), e);
                         }
                     });
                 });
@@ -112,6 +114,6 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
         helper.setText(text, true);
 
         mailSender.send(message);
-        log.info("Low stock medication notification sent to {}", to);
+        log.info("Уведомление о низком запасе медикаментов отправлено на адрес {}", to);
     }
 }
