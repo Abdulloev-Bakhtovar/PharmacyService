@@ -11,7 +11,6 @@ import ru.bakht.pharmacy.service.model.Employee;
 import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
 import ru.bakht.pharmacy.service.repository.EmployeeRepository;
-import ru.bakht.pharmacy.service.repository.PharmacyRepository;
 import ru.bakht.pharmacy.service.service.EmployeeService;
 import ru.bakht.pharmacy.service.service.PharmacyService;
 
@@ -70,7 +69,9 @@ public class EmployeeServiceImpl implements EmployeeService {
             return updateEmployee(id, employeeDto);
         }
 
-        Pharmacy pharmacy = findPharmacyById(employeeDto.getPharmacy().getId());
+        Pharmacy pharmacy = pharmacyMapper.toEntity(
+                pharmacyService.getPharmacyById(employeeDto.getPharmacy().getId())
+        );
 
         log.info("Создание нового сотрудника: {}", employeeDto);
         Employee employee = employeeMapper.toEntity(employeeDto);
@@ -111,18 +112,4 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    /**
-     * Находит аптеку по идентификатору и выбрасывает исключение, если аптека не найдена.
-     *
-     * @param pharmacyId идентификатор аптеки
-     * @return найденная аптека
-     * @throws EntityNotFoundException если аптека не найдена
-     */
-    private Pharmacy findPharmacyById(Long pharmacyId) {
-        return pharmacyRepository.findById(pharmacyId)
-                .orElseThrow(() -> {
-                    log.error("Аптека с идентификатором {} не найдена", pharmacyId);
-                    return new EntityNotFoundException("Аптека", pharmacyId);
-                });
-    }
 }
