@@ -97,7 +97,10 @@ public class OrderServiceImpl implements OrderService {
                     return new EntityNotFoundException("Заказ", id);
                 });
 
-        updateOrderFromDto(existingOrder, orderDto);
+        orderMapper.updateEntityFromDto(orderDto, existingOrder);
+        existingOrder.setOrderDate(LocalDate.now());
+        existingOrder.setTotalAmount(orderDto.getQuantity() * existingOrder.getMedication().getPrice());
+
         validateAndSetRelatedEntities(existingOrder, orderDto);
 
         updatePharmacyMedicationQuantity(orderDto);
@@ -112,19 +115,6 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrderById(Long id) {
         log.info("Удаление заказа с идентификатором {}", id);
         orderRepository.deleteById(id);
-    }
-
-    /**
-     * Обновляет информацию о заказе на основе данных из DTO.
-     *
-     * @param order объект Order, который необходимо обновить
-     * @param orderDto объект OrderDto с новыми данными
-     */
-    private void updateOrderFromDto(Order order, OrderDto orderDto) {
-        order.setQuantity(orderDto.getQuantity());
-        order.setStatus(orderDto.getStatus());
-        order.setOrderDate(LocalDate.now());
-        order.setTotalAmount(orderDto.getQuantity() * order.getMedication().getPrice());
     }
 
     /**

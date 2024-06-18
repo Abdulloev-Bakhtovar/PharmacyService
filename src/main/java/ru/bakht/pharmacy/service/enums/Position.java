@@ -1,4 +1,4 @@
-package ru.bakht.pharmacy.service.model.enums;
+package ru.bakht.pharmacy.service.enums;
 
 public enum Position {
     MANAGER,

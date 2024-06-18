@@ -81,7 +81,7 @@ public class CustomerServiceImpl implements CustomerService {
                     return new EntityNotFoundException("Клиент", id);
                 });
 
-        updateCustomerFromDto(existingCustomer, customerDto);
+        customerMapper.updateEntityFromDto(customerDto, existingCustomer);
         return customerMapper.toDto(customerRepository.save(existingCustomer));
     }
 
@@ -92,17 +92,5 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomerById(Long id) {
         log.info("Удаление клиента с идентификатором {}", id);
         customerRepository.deleteById(id);
-    }
-
-    /**
-     * Обновляет информацию о клиенте на основе данных из DTO.
-     *
-     * @param customer объект Customer, который необходимо обновить
-     * @param customerDto объект CustomerDto с новыми данными
-     */
-    private void updateCustomerFromDto(Customer customer, CustomerDto customerDto) {
-        customer.setName(customerDto.getName());
-        customer.setAddress(customerDto.getAddress());
-        customer.setPhone(customerDto.getPhone());
     }
 }

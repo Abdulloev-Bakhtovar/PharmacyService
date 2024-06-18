@@ -92,7 +92,7 @@ public class PharmacyServiceImpl implements PharmacyService {
                     return new EntityNotFoundException("Аптека", id);
                 });
 
-        updatePharmacyFromDto(existingPharmacy, pharmacyDto);
+        pharmacyMapper.updateEntityFromDto(pharmacyDto, existingPharmacy);
         return pharmacyMapper.toDto(pharmacyRepository.save(existingPharmacy));
     }
 
@@ -174,18 +174,6 @@ public class PharmacyServiceImpl implements PharmacyService {
         }
 
         entityManager.remove(pharmacyMedication);
-    }
-
-    /**
-     * Обновляет информацию об аптеке на основе данных из DTO.
-     *
-     * @param pharmacy объект Pharmacy, который необходимо обновить
-     * @param pharmacyDto объект PharmacyDto с новыми данными
-     */
-    private void updatePharmacyFromDto(Pharmacy pharmacy, PharmacyDto pharmacyDto) {
-        pharmacy.setName(pharmacyDto.getName());
-        pharmacy.setAddress(pharmacyDto.getAddress());
-        pharmacy.setPhone(pharmacyDto.getPhone());
     }
 
     /**

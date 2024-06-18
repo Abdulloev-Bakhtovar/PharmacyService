@@ -13,6 +13,7 @@ import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
 import ru.bakht.pharmacy.service.repository.EmployeeRepository;
 import ru.bakht.pharmacy.service.repository.PharmacyRepository;
 import ru.bakht.pharmacy.service.service.EmployeeService;
+import ru.bakht.pharmacy.service.service.PharmacyService;
 
 import java.util.List;
 
@@ -26,8 +27,9 @@ import java.util.List;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final PharmacyRepository pharmacyRepository;
+    private final PharmacyService pharmacyService;
     private final EmployeeMapper employeeMapper;
+    private final PharmacyMapper pharmacyMapper;
 
     /**
      * {@inheritDoc}
@@ -91,9 +93,11 @@ public class EmployeeServiceImpl implements EmployeeService {
                     return new EntityNotFoundException("Сотрудник", id);
                 });
 
-        Pharmacy pharmacy = findPharmacyById(employeeDto.getPharmacy().getId());
+        Pharmacy pharmacy = pharmacyMapper.toEntity(
+                pharmacyService.getPharmacyById(employeeDto.getPharmacy().getId())
+        );
 
-        updateEmployeeFromDto(existingEmployee, employeeDto);
+        employeeMapper.updateEntityFromDto(employeeDto, existingEmployee);
         existingEmployee.setPharmacy(pharmacy);
         return employeeMapper.toDto(employeeRepository.save(existingEmployee));
     }
@@ -105,18 +109,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteEmployeeById(Long id) {
         log.info("Удаление сотрудника с идентификатором {}", id);
         employeeRepository.deleteById(id);
-    }
-
-    /**
-     * Обновляет информацию о сотруднике на основе данных из DTO.
-     *
-     * @param employee объект Employee, который необходимо обновить
-     * @param employeeDto объект EmployeeDto с новыми данными
-     */
-    private void updateEmployeeFromDto(Employee employee, EmployeeDto employeeDto) {
-        employee.setName(employeeDto.getName());
-        employee.setPosition(employeeDto.getPosition());
-        employee.setEmail(employeeDto.getEmail());
     }
 
     /**

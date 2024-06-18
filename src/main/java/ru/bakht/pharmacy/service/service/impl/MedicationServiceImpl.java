@@ -86,7 +86,7 @@ public class MedicationServiceImpl implements MedicationService {
                     return new EntityNotFoundException("Лекарство", id);
                 });
 
-        updateMedicationFromDto(existingMedication, medicationDto);
+        medicationMapper.updateEntityFromDto(medicationDto, existingMedication);
         return medicationMapper.toDto(medicationRepository.save(existingMedication));
     }
 
@@ -97,17 +97,5 @@ public class MedicationServiceImpl implements MedicationService {
     public void deleteMedicationById(Long id) {
         log.info("Удаление лекарства с идентификатором {}", id);
         medicationRepository.deleteById(id);
-    }
-
-    /**
-     Обновляет информацию о лекарстве на основе данных из DTO.
-     @param medication объект Medication, который необходимо обновить
-     @param medicationDto объект MedicationDto с новыми данными
-     */
-    private void updateMedicationFromDto(Medication medication, MedicationDto medicationDto) {
-        medication.setName(medicationDto.getName());
-        medication.setForm(medicationDto.getForm());
-        medication.setPrice(medicationDto.getPrice());
-        medication.setExpirationDate(medicationDto.getExpirationDate());
     }
 }
