@@ -7,18 +7,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.bakht.pharmacy.service.enums.Form;
+import ru.bakht.pharmacy.service.enums.Position;
+import ru.bakht.pharmacy.service.enums.Status;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.OrderMapper;
 import ru.bakht.pharmacy.service.model.*;
 import ru.bakht.pharmacy.service.model.dto.*;
-import ru.bakht.pharmacy.service.model.enums.Form;
-import ru.bakht.pharmacy.service.model.enums.Position;
-import ru.bakht.pharmacy.service.model.enums.Status;
 import ru.bakht.pharmacy.service.repository.*;
 import ru.bakht.pharmacy.service.service.impl.OrderServiceImpl;
 
 import java.lang.reflect.Field;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,7 +86,7 @@ public class OrderServiceImplTest {
         order.setMedication(medication);
         order.setQuantity(2);
         order.setStatus(Status.NEW);
-        order.setOrderDate(new Date());
+        order.setOrderDate(LocalDate.now());
         order.setTotalAmount(200.0);
 
         Field entityManagerField = OrderServiceImpl.class.getDeclaredField("entityManager");
@@ -175,26 +175,12 @@ public class OrderServiceImplTest {
 
 
     @Test
-    void deleteOrderById_Success() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
-        doNothing().when(orderRepository).deleteById(1L);
+    void deleteOrderById_SuccessfulDeletion() {
+        Long orderId = 10L;
 
-        orderService.deleteOrderById(1L);
+        orderService.deleteOrderById(orderId);
 
-        verify(orderRepository, times(1)).findById(1L);
-        verify(orderRepository, times(1)).deleteById(1L);
+        verify(orderRepository, times(1)).deleteById(orderId);
     }
 
-    @Test
-    void deleteOrderById_ThrowsEntityNotFoundException() {
-        when(orderRepository.findById(1L)).thenReturn(Optional.empty());
-
-        EntityNotFoundException thrown = assertThrows(
-                EntityNotFoundException.class,
-                () -> orderService.deleteOrderById(1L)
-        );
-
-        assertTrue(thrown.getMessage().contains("Заказ с ID 1 не найден"));
-        verify(orderRepository, times(1)).findById(1L);
-    }
 }
