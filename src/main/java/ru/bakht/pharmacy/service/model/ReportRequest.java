@@ -3,8 +3,9 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.bakht.pharmacy.service.enums.ReportType;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -20,13 +21,13 @@ public class ReportRequest {
     @Column(name = "id")
     Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "report_name")
-    String reportName;
+    ReportType reportName;
 
     @Column(name = "request_count")
     Integer requestCount;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_request_time")
-    Date lastRequestTime;
+    LocalDate lastRequestTime;
 }

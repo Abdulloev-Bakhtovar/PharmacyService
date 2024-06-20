@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.bakht.pharmacy.service.model.Order;
 import ru.bakht.pharmacy.service.model.dto.TotalOrdersProjection;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -16,8 +16,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT SUM(o.quantity) AS totalQuantity, SUM(o.totalAmount) AS totalAmount "
             + "FROM Order o "
             + "WHERE o.orderDate BETWEEN :startDate AND :endDate")
-    TotalOrdersProjection findTotalQuantityAndAmountByDateRange(@Param("startDate") Date startDate,
-                                                                @Param("endDate") Date endDate);
+    TotalOrdersProjection findTotalQuantityAndAmountByDateRange(@Param("startDate") LocalDate startDate,
+                                                                @Param("endDate") LocalDate endDate);
 
     @Query("SELECT o "
             + "FROM Order o "

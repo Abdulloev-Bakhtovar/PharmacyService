@@ -4,6 +4,8 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -30,7 +32,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleResourceNotFoundException(EntityNotFoundException ex) {
-        log.error("Entity not found: {}", ex.getMessage());
+        log.error("Сущность не найдена: {}", ex.getMessage());
         return ex.getMessage();
     }
 
@@ -43,7 +45,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleIllegalArgumentException(IllegalArgumentException ex) {
-        log.error("Illegal argument: {}", ex.getMessage());
+        log.error("Недопустимый аргумент: {}", ex.getMessage());
         return ex.getMessage();
     }
 
@@ -59,7 +61,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
-        log.error("Validation errors: {}", errors);
+        log.error("Ошибки валидации: {}", errors);
         return errors;
     }
 
@@ -75,7 +77,7 @@ public class GlobalExceptionHandler {
         Map<String, String> errors = new HashMap<>();
         ex.getConstraintViolations().forEach(error ->
                 errors.put(error.getPropertyPath().toString(), error.getMessage()));
-        log.error("Constraint violation: {}", errors);
+        log.error("Нарушение ограничений: {}", errors);
         return errors;
     }
 
@@ -88,8 +90,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        String error = "Неверный тип параметра: " + ex.getValue();
-        log.error("Type mismatch: {}", error);
+        String error = "Неверный тип аргумента: " + ex.getValue();
+        log.error("Несоответствие типов: {}", error);
         return error;
     }
 
@@ -103,7 +105,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public String handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
         String error = "Некорректный формат JSON запроса: " + ex.getMessage();
-        log.error("Message not readable: {}", error);
+        log.error("Сообщение нечитаемо: {}", error);
         return error;
     }
 
@@ -117,7 +119,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNoHandlerFoundException(NoHandlerFoundException ex) {
         String error = "Не найден обработчик для " + ex.getRequestURL();
-        log.error("No handler found: {}", error);
+        log.error("Обработчик не найден: {}", error);
         return error;
     }
 
@@ -130,7 +132,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleIllegalStateException(IllegalStateException ex) {
-        log.error("Illegal state: {}", ex.getMessage());
+        log.error("Недопустимое состояние: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    /**
+     * Обрабатывает исключение AccessDeniedException.
+     *
+     * @param ex исключение AccessDeniedException.
+     * @return сообщение об ошибке.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Доступ запрещён: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    /**
+     * Обрабатывает исключение AuthenticationException.
+     *
+     * @param ex исключение AuthenticationException.
+     * @return сообщение об ошибке.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleAuthenticationException(AuthenticationException ex) {
+        log.error("Ошибка аутентификации: {}", ex.getMessage());
         return ex.getMessage();
     }
 
@@ -143,7 +171,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleGenericException(Exception ex) {
-        log.error("Generic error: {}", ex.getMessage(), ex);
+        log.error("Общая ошибка: {}", ex.getMessage(), ex);
         return ex.getMessage();
     }
 }

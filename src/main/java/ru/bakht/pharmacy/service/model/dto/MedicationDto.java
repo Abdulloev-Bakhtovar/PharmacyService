@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.model.enums.Form;
+import ru.bakht.pharmacy.service.enums.Form;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -29,7 +29,7 @@ public class MedicationDto {
     Double price;
 
     @NotNull(message = "Дата истечения срока обязательна")
-    Date expirationDate;
+    LocalDate expirationDate;
 
 
 }

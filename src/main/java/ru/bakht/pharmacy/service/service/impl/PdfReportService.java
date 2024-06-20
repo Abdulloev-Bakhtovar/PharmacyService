@@ -1,5 +1,8 @@
 package ru.bakht.pharmacy.service.service.impl;
 
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -14,47 +17,48 @@ import ru.bakht.pharmacy.service.service.ReportGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
 @Service
 public class PdfReportService implements ReportGenerator {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      * {@inheritDoc}
      */
     @Override
     public byte[] generateMedicationsReport(List<MedicationDto> medications) throws IOException {
-        log.info("Generating medications PDF report with {} entries", medications.size());
+        log.info("Генерация PDF-отчета по лекарствам с {} записями", medications.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Medications Report"));
+        document.add(new Paragraph("Отчет по лекарствам").setFont(font));
         Table table = new Table(new float[]{1, 3, 2, 2, 3});
-        table.addHeaderCell("ID");
-        table.addHeaderCell("Name");
-        table.addHeaderCell("Form");
-        table.addHeaderCell("Price");
-        table.addHeaderCell("Expiration Date");
+        table.addHeaderCell(new Paragraph("ID").setFont(font));
+        table.addHeaderCell(new Paragraph("Наименование").setFont(font));
+        table.addHeaderCell(new Paragraph("Форма").setFont(font));
+        table.addHeaderCell(new Paragraph("Цена").setFont(font));
+        table.addHeaderCell(new Paragraph("Дата истечения срока").setFont(font));
 
         for (MedicationDto medication : medications) {
-            table.addCell(medication.getId().toString());
-            table.addCell(medication.getName());
-            table.addCell(medication.getForm().name());
-            table.addCell(medication.getPrice().toString());
-            table.addCell(dateFormat.format(medication.getExpirationDate()));
+            table.addCell(new Paragraph(medication.getId().toString()).setFont(font));
+            table.addCell(new Paragraph(medication.getName()).setFont(font));
+            table.addCell(new Paragraph(medication.getForm().name()).setFont(font));
+            table.addCell(new Paragraph(medication.getPrice().toString()).setFont(font));
+            table.addCell(new Paragraph(dateFormat.format(medication.getExpirationDate())).setFont(font));
         }
 
         document.add(table);
         document.close();
 
-        log.info("Medications PDF report generated successfully");
+        log.info("PDF-отчет по лекарствам успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -64,33 +68,36 @@ public class PdfReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateOrdersReport(List<OrderDto> orders) throws IOException {
-        log.info("Generating orders PDF report with {} entries", orders.size());
+        log.info("Генерация PDF-отчета по заказам с {} записями", orders.size());
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Orders Report"));
-        Table table = new Table(new float[]{1, 2, 2, 3, 2});
-        table.addHeaderCell("ID");
-        table.addHeaderCell("Quantity");
-        table.addHeaderCell("Total Amount");
-        table.addHeaderCell("Order Date");
-        table.addHeaderCell("Status");
+        document.add(new Paragraph("Отчет по заказам").setFont(font));
+        Table table = new Table(new float[]{1, 3, 2, 2, 3, 2});
+        table.addHeaderCell(new Paragraph("ID").setFont(font));
+        table.addHeaderCell(new Paragraph("Названия").setFont(font));
+        table.addHeaderCell(new Paragraph("Количество").setFont(font));
+        table.addHeaderCell(new Paragraph("Общая сумма").setFont(font));
+        table.addHeaderCell(new Paragraph("Дата заказа").setFont(font));
+        table.addHeaderCell(new Paragraph("Статус").setFont(font));
 
         for (OrderDto order : orders) {
-            table.addCell(order.getId().toString());
-            table.addCell(order.getQuantity().toString());
-            table.addCell(order.getTotalAmount().toString());
-            table.addCell(dateFormat.format(order.getOrderDate()));
-            table.addCell(order.getStatus().name());
+            table.addCell(new Paragraph(order.getId().toString()).setFont(font));
+            table.addCell(new Paragraph(order.getMedicationDto().getName()).setFont(font));
+            table.addCell(new Paragraph(order.getQuantity().toString()).setFont(font));
+            table.addCell(new Paragraph(order.getTotalAmount().toString()).setFont(font));
+            table.addCell(new Paragraph(dateFormat.format(order.getOrderDate())).setFont(font));
+            table.addCell(new Paragraph(order.getStatus().name()).setFont(font));
         }
 
         document.add(table);
         document.close();
 
-        log.info("Orders PDF report generated successfully");
+        log.info("PDF-отчет по заказам успешно сгенерирован");
 
         return outputStream.toByteArray();
     }
@@ -100,25 +107,26 @@ public class PdfReportService implements ReportGenerator {
      */
     @Override
     public byte[] generateTotalOrdersReport(TotalOrders totalOrders) throws IOException {
-        log.info("Generating total orders PDF report");
+        log.info("Генерация PDF-отчета по общему числу заказов");
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Total Orders Report"));
+        document.add(new Paragraph("Отчет по общему числу заказов").setFont(font));
         Table table = new Table(new float[]{2, 2});
-        table.addHeaderCell("Total Quantity");
-        table.addHeaderCell("Total Amount");
+        table.addHeaderCell(new Paragraph("Общее количество").setFont(font));
+        table.addHeaderCell(new Paragraph("Общая сумма").setFont(font));
 
-        table.addCell(totalOrders.getTotalQuantity().toString());
-        table.addCell(totalOrders.getTotalAmount().toString());
+        table.addCell(new Paragraph(totalOrders.getTotalQuantity().toString()).setFont(font));
+        table.addCell(new Paragraph(totalOrders.getTotalAmount().toString()).setFont(font));
 
         document.add(table);
         document.close();
 
-        log.info("Total orders PDF report generated successfully");
+        log.info("PDF-отчет по общему числу заказов успешно сгенерирован");
 
         return outputStream.toByteArray();
     }

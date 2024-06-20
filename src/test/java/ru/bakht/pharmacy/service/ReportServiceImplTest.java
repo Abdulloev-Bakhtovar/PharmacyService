@@ -18,7 +18,7 @@ import ru.bakht.pharmacy.service.repository.MedicationRepository;
 import ru.bakht.pharmacy.service.repository.OrderRepository;
 import ru.bakht.pharmacy.service.service.impl.ReportServiceImpl;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,16 +44,16 @@ class ReportServiceImplTest {
 
     private Long pharmacyId;
     private String customerPhone;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private TotalOrdersProjection totalOrdersProjection;
 
     @BeforeEach
     void setUp() {
         pharmacyId = 1L;
         customerPhone = "1234567890";
-        startDate = new Date();
-        endDate = new Date();
+        startDate = LocalDate.now();
+        endDate = LocalDate.now();
         totalOrdersProjection = new TotalOrdersProjection() {
             @Override
             public Integer getTotalQuantity() {

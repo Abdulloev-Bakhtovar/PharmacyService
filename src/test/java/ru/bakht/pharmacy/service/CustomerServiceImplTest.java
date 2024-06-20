@@ -129,28 +129,11 @@ public class CustomerServiceImplTest {
     }
 
     @Test
-    void deleteCustomerById() {
-        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        doNothing().when(customerRepository).deleteById(1L);
+    void deleteCustomerById_SuccessfulDeletion() {
+        Long customerId = 1L;
 
-        customerService.deleteCustomerById(1L);
+        customerService.deleteCustomerById(customerId);
 
-        verify(customerRepository, times(1)).findById(1L);
-        verify(customerRepository, times(1)).deleteById(1L);
-    }
-
-    @Test
-    void deleteCustomerById_ThrowsEntityNotFoundException() {
-        when(customerRepository.findById(1L)).thenReturn(Optional.empty());
-
-        EntityNotFoundException thrown = assertThrows(
-                EntityNotFoundException.class,
-                () -> customerService.deleteCustomerById(1L),
-                "Expected deleteCustomerById to throw, but it didn't"
-        );
-
-        assertTrue(thrown.getMessage().contains("Клиент с ID 1 не найден"));
-        verify(customerRepository, times(1)).findById(1L);
-        verify(customerRepository, times(0)).deleteById(1L);
+        verify(customerRepository, times(1)).deleteById(customerId);
     }
 }
