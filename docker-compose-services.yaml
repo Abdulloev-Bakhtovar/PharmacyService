@@ -1,0 +1,49 @@
+version: '3.8'
+
+networks:
+  pharmacy_network:
+    external: true
+
+services:
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    networks:
+      - pharmacy_network
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pharmacy_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    networks:
+      - pharmacy_network
+
+  pharmacy-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pharmacy_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_REDIS_HOST: redis
+      SERVER_PORT: 8081
+      MAIL_HOST: smtp.gmail.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: root@gmail.com
+      MAIL_PASSWORD: password
+      OAUTH2_ISSUER_URI: http://pharmacy-keycloak:8080/realms/pharmacy-realm
+      KEYCLOAK_CLIENT_ID: pharmacy-client
+      KEYCLOAK_CLIENT_SECRET: pLgjRsv0J30klbROqjshjrEfBzPwnceC
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - pharmacy_network
