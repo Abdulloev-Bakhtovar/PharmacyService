@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.bakht.pharmacy.service.enums.ReportType;
 import ru.bakht.pharmacy.service.model.ReportRequest;
 import ru.bakht.pharmacy.service.repository.ReportRequestRepository;
 import ru.bakht.pharmacy.service.service.ReportRequestService;
@@ -25,7 +26,7 @@ public class ReportRequestServiceImpl implements ReportRequestService {
      * {@inheritDoc}
      */
     @Override
-    public void recordReportRequest(String reportName) {
+    public void recordReportRequest(ReportType reportName) {
         log.info("Запись запроса на отчет: {}", reportName);
 
         ReportRequest reportRequest = reportRequestRepository.findByReportName(reportName)

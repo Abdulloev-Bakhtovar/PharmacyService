@@ -1,10 +1,11 @@
 spring:
   application:
-    name: PharmacyService
+    name: "PharmacyService"
+
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/${POSTGRES_DB:pharmacy_db}
-    username: ${POSTGRES_USERNAME:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pharmacy_db}"
+    username: "${SPRING_DATASOURCE_USERNAME:postgres}"
+    password: "${SPRING_DATASOURCE_PASSWORD:root}"
   jpa:
     hibernate:
       ddl-auto: update
@@ -12,21 +13,50 @@ spring:
       hibernate:
         dialect: "org.hibernate.dialect.PostgreSQLDialect"
         show_sql: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:/db/changelog/db.changelog_master.yaml
+
   mail:
-    host: smtp.gmail.com
-    port: ${PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: "${MAIL_HOST:smtp.gmail.com}"
+    port: "${MAIL_PORT:587}"
+    username: "${MAIL_USERNAME:}"
+    password: "${MAIL_PASSWORD:}"
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: "${SPRING_REDIS_HOST:redis}"
+      port: "${SPRING_REDIS_PORT:6379}"
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "${OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
+      client:
+        provider:
+          keycloak:
+            issuer-uri: "${OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: "${KEYCLOAK_CLIENT_ID:pharmacy-client}"
+            client-secret: "${KEYCLOAK_CLIENT_SECRET:pLgjRsv0J30klbROqjshjrEfBzPwnceC}"
+            scope:
+              - email
+              - profile
+              - openid
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
 
 server:
-  port: ${SERVER_PORT:8081}
+  port: "${SERVER_PORT:8081}"

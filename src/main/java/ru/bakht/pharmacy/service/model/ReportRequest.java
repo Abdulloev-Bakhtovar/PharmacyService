@@ -3,6 +3,7 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.bakht.pharmacy.service.enums.ReportType;
 
 import java.time.LocalDate;
 
@@ -20,8 +21,9 @@ public class ReportRequest {
     @Column(name = "id")
     Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "report_name")
-    String reportName;
+    ReportType reportName;
 
     @Column(name = "request_count")
     Integer requestCount;
