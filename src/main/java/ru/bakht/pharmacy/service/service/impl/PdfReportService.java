@@ -1,5 +1,8 @@
 package ru.bakht.pharmacy.service.service.impl;
 
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -14,14 +17,14 @@ import ru.bakht.pharmacy.service.service.ReportGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
 @Service
 public class PdfReportService implements ReportGenerator {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      * {@inheritDoc}
@@ -34,21 +37,22 @@ public class PdfReportService implements ReportGenerator {
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Отчет по лекарствам"));
+        document.add(new Paragraph("Отчет по лекарствам").setFont(font));
         Table table = new Table(new float[]{1, 3, 2, 2, 3});
-        table.addHeaderCell("ID");
-        table.addHeaderCell("Наименование");
-        table.addHeaderCell("Форма");
-        table.addHeaderCell("Цена");
-        table.addHeaderCell("Дата истечения срока");
+        table.addHeaderCell(new Paragraph("ID").setFont(font));
+        table.addHeaderCell(new Paragraph("Наименование").setFont(font));
+        table.addHeaderCell(new Paragraph("Форма").setFont(font));
+        table.addHeaderCell(new Paragraph("Цена").setFont(font));
+        table.addHeaderCell(new Paragraph("Дата истечения срока").setFont(font));
 
         for (MedicationDto medication : medications) {
-            table.addCell(medication.getId().toString());
-            table.addCell(medication.getName());
-            table.addCell(medication.getForm().name());
-            table.addCell(medication.getPrice().toString());
-            table.addCell(dateFormat.format(medication.getExpirationDate()));
+            table.addCell(new Paragraph(medication.getId().toString()).setFont(font));
+            table.addCell(new Paragraph(medication.getName()).setFont(font));
+            table.addCell(new Paragraph(medication.getForm().name()).setFont(font));
+            table.addCell(new Paragraph(medication.getPrice().toString()).setFont(font));
+            table.addCell(new Paragraph(dateFormat.format(medication.getExpirationDate())).setFont(font));
         }
 
         document.add(table);
@@ -70,21 +74,24 @@ public class PdfReportService implements ReportGenerator {
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Отчет по заказам"));
-        Table table = new Table(new float[]{1, 2, 2, 3, 2});
-        table.addHeaderCell("ID");
-        table.addHeaderCell("Количество");
-        table.addHeaderCell("Общая сумма");
-        table.addHeaderCell("Дата заказа");
-        table.addHeaderCell("Статус");
+        document.add(new Paragraph("Отчет по заказам").setFont(font));
+        Table table = new Table(new float[]{1, 3, 2, 2, 3, 2});
+        table.addHeaderCell(new Paragraph("ID").setFont(font));
+        table.addHeaderCell(new Paragraph("Названия").setFont(font));
+        table.addHeaderCell(new Paragraph("Количество").setFont(font));
+        table.addHeaderCell(new Paragraph("Общая сумма").setFont(font));
+        table.addHeaderCell(new Paragraph("Дата заказа").setFont(font));
+        table.addHeaderCell(new Paragraph("Статус").setFont(font));
 
         for (OrderDto order : orders) {
-            table.addCell(order.getId().toString());
-            table.addCell(order.getQuantity().toString());
-            table.addCell(order.getTotalAmount().toString());
-            table.addCell(dateFormat.format(order.getOrderDate()));
-            table.addCell(order.getStatus().name());
+            table.addCell(new Paragraph(order.getId().toString()).setFont(font));
+            table.addCell(new Paragraph(order.getMedicationDto().getName()).setFont(font));
+            table.addCell(new Paragraph(order.getQuantity().toString()).setFont(font));
+            table.addCell(new Paragraph(order.getTotalAmount().toString()).setFont(font));
+            table.addCell(new Paragraph(dateFormat.format(order.getOrderDate())).setFont(font));
+            table.addCell(new Paragraph(order.getStatus().name()).setFont(font));
         }
 
         document.add(table);
@@ -106,14 +113,15 @@ public class PdfReportService implements ReportGenerator {
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
+        PdfFont font = PdfFontFactory.createFont("static/arial-unicode-ms.ttf", PdfEncodings.IDENTITY_H);
 
-        document.add(new Paragraph("Отчет по общему числу заказов"));
+        document.add(new Paragraph("Отчет по общему числу заказов").setFont(font));
         Table table = new Table(new float[]{2, 2});
-        table.addHeaderCell("Общее количество");
-        table.addHeaderCell("Общая сумма");
+        table.addHeaderCell(new Paragraph("Общее количество").setFont(font));
+        table.addHeaderCell(new Paragraph("Общая сумма").setFont(font));
 
-        table.addCell(totalOrders.getTotalQuantity().toString());
-        table.addCell(totalOrders.getTotalAmount().toString());
+        table.addCell(new Paragraph(totalOrders.getTotalQuantity().toString()).setFont(font));
+        table.addCell(new Paragraph(totalOrders.getTotalAmount().toString()).setFont(font));
 
         document.add(table);
         document.close();

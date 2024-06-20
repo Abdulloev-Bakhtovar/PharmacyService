@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,7 +33,13 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     private final JavaMailSender mailSender;
     private final RedisLockRegistry redisLockRegistry;
 
-    private static final int THRESHOLD = 10; // минимальная количества медикаментов
+    @Value("${spring.mail.username}")
+    private String mailUsername;
+
+    @Value("${spring.mail.password}")
+    private String mailPassword;
+
+    private static final int THRESHOLD = 10; // минимальное количество медикаментов
 
     /**
      * {@inheritDoc}
@@ -40,33 +47,37 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     @Scheduled(cron = "0 0 0 * * ?")
     @Override
     public void checkInventory() {
-        Lock lock = redisLockRegistry.obtain("inventoryCheckLock");
+        if (isEmailConfigured()) {
+            Lock lock = redisLockRegistry.obtain("inventoryCheckLock");
 
-        try {
-            if (lock.tryLock()) {
-                log.info("Начало проверки запасов медикаментов...");
-
-                List<PharmacyMedication> lowStockMedications =
-                        medicationRepository.findMedicationsBelowThreshold(THRESHOLD);
-
-                if (!lowStockMedications.isEmpty()) {
-                    sendNotifications(lowStockMedications);
-                }
-
-                log.info("Проверка запасов медикаментов завершена.");
-            } else {
-                log.info("Другой экземпляр уже выполняет проверку запасов медикаментов.");
-            }
-        } catch (Exception e) {
-            log.error("Ошибка во время проверки запасов медикаментов", e);
-
-        } finally {
             try {
-                lock.unlock();
-            } catch (IllegalStateException e) {
-                log.warn("Не удалось освободить блокировку. "
-                        + "Блокировка не удерживается этим экземпляром.", e);
+                if (lock.tryLock()) {
+                    log.info("Начало проверки запасов медикаментов...");
+
+                    List<PharmacyMedication> lowStockMedications =
+                            medicationRepository.findMedicationsBelowThreshold(THRESHOLD);
+
+                    if (!lowStockMedications.isEmpty()) {
+                        sendNotifications(lowStockMedications);
+                    }
+
+                    log.info("Проверка запасов медикаментов завершена.");
+                } else {
+                    log.info("Другой экземпляр уже выполняет проверку запасов медикаментов.");
+                }
+            } catch (Exception e) {
+                log.error("Ошибка во время проверки запасов медикаментов", e);
+
+            } finally {
+                try {
+                    lock.unlock();
+                } catch (IllegalStateException e) {
+                    log.warn("Не удалось освободить блокировку. "
+                            + "Блокировка не удерживается этим экземпляром.", e);
+                }
             }
+        } else {
+            log.warn("Параметры электронной почты не настроены. Пропуск проверки запасов медикаментов.");
         }
     }
 
@@ -115,5 +126,10 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
 
         mailSender.send(message);
         log.info("Уведомление о низком запасе медикаментов отправлено на адрес {}", to);
+    }
+
+    private boolean isEmailConfigured() {
+        return mailUsername != null && !mailUsername.isEmpty() &&
+                mailPassword != null && !mailPassword.isEmpty();
     }
 }

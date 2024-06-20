@@ -11,7 +11,8 @@ import ru.bakht.pharmacy.service.service.ReportGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ import java.util.List;
 @Service
 public class ExcelReportService implements ReportGenerator {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      * {@inheritDoc}
@@ -48,7 +49,8 @@ public class ExcelReportService implements ReportGenerator {
             row.createCell(2).setCellValue(medication.getForm().name());
             row.createCell(3).setCellValue(medication.getPrice());
             Cell dateCell = row.createCell(4);
-            dateCell.setCellValue(dateFormat.format(medication.getExpirationDate()));
+            LocalDate expirationDate = medication.getExpirationDate();
+            dateCell.setCellValue(dateFormat.format(expirationDate));
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -71,7 +73,7 @@ public class ExcelReportService implements ReportGenerator {
         Sheet sheet = workbook.createSheet("Заказы");
 
         Row headerRow = sheet.createRow(0);
-        String[] columns = {"ID", "Количество", "Общая сумма", "Дата заказа", "Статус"};
+        String[] columns = {"ID", "Названиея", "Количество", "Общая сумма", "Дата заказа", "Статус"};
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(columns[i]);
@@ -81,11 +83,12 @@ public class ExcelReportService implements ReportGenerator {
         for (OrderDto order : orders) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(order.getId());
-            row.createCell(1).setCellValue(order.getQuantity());
-            row.createCell(2).setCellValue(order.getTotalAmount());
-            Cell dateCell = row.createCell(3);
+            row.createCell(1).setCellValue(order.getMedicationDto().getName());
+            row.createCell(2).setCellValue(order.getQuantity());
+            row.createCell(3).setCellValue(order.getTotalAmount());
+            Cell dateCell = row.createCell(4);
             dateCell.setCellValue(dateFormat.format(order.getOrderDate()));
-            row.createCell(4).setCellValue(order.getStatus().name());
+            row.createCell(5).setCellValue(order.getStatus().name());
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -127,3 +130,4 @@ public class ExcelReportService implements ReportGenerator {
         return outputStream.toByteArray();
     }
 }
+

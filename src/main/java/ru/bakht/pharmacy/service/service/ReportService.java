@@ -4,7 +4,7 @@ import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ public interface ReportService {
      * @param endDate конечная дата периода
      * @return объект {@link TotalOrders}, содержащий общее количество и общую стоимость заказов
      */
-    TotalOrders getTotalQuantityAndAmount(Date startDate, Date endDate);
+    TotalOrders getTotalQuantityAndAmount(LocalDate startDate, LocalDate endDate);
 
     /**
      * Получает список заказов, сделанных конкретным клиентом по его номеру телефона.

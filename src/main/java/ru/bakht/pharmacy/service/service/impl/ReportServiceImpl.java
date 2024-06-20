@@ -14,7 +14,7 @@ import ru.bakht.pharmacy.service.repository.MedicationRepository;
 import ru.bakht.pharmacy.service.repository.OrderRepository;
 import ru.bakht.pharmacy.service.service.ReportService;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -44,7 +44,7 @@ public class ReportServiceImpl implements ReportService {
     /**
      * {@inheritDoc}
      */
-    public TotalOrders getTotalQuantityAndAmount(Date startDate, Date endDate) {
+    public TotalOrders getTotalQuantityAndAmount(LocalDate startDate, LocalDate endDate) {
         log.info("Получен запрос на получение общего количества и суммы заказов с {} по {}", startDate, endDate);
 
         TotalOrdersProjection projection = orderRepository.findTotalQuantityAndAmountByDateRange(startDate, endDate);

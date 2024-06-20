@@ -1,5 +1,7 @@
 package ru.bakht.pharmacy.service.service;
 
+import ru.bakht.pharmacy.service.enums.ReportType;
+
 /**
  * Интерфейс для записи запросов на отчеты.
  */
@@ -10,5 +12,5 @@ public interface ReportRequestService {
      *
      * @param reportName имя отчета
      */
-    void recordReportRequest(String reportName);
+    void recordReportRequest(ReportType reportName);
 }

@@ -58,14 +58,7 @@ public interface PharmacyService {
      *
      * @param pharmacyMedicationDto DTO с информацией о лекарстве и аптеке
      */
-    void addMedication(PharmacyMedicationDto pharmacyMedicationDto);
-
-    /**
-     * Обновляет количество лекарства в аптеке.
-     *
-     * @param pharmacyMedicationDto DTO с информацией о лекарстве и аптеке
-     */
-    void updateMedication(PharmacyMedicationDto pharmacyMedicationDto);
+    void addOrUpdateMedication(PharmacyMedicationDto pharmacyMedicationDto);
 
     /**
      * Удаляет лекарство из аптеки.
