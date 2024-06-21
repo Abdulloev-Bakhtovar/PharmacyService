@@ -1,4 +1,4 @@
-package ru.bakht.pharmacy.service.service.impl;
+package ru.bakht.pharmacy.service.service.report;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -14,19 +14,18 @@ import ru.bakht.pharmacy.service.model.Employee;
 import ru.bakht.pharmacy.service.model.PharmacyMedication;
 import ru.bakht.pharmacy.service.repository.EmployeeRepository;
 import ru.bakht.pharmacy.service.repository.MedicationRepository;
-import ru.bakht.pharmacy.service.service.InventoryCheckService;
 
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
- * Реализация интерфейса {@link InventoryCheckService} для проверки запасов медикаментов и уведомления сотрудников.
+ * Класс для проверки запасов медикаментов и уведомления сотрудников.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InventoryCheckServiceImpl implements InventoryCheckService {
+public class InventoryCheckService {
 
     private final MedicationRepository medicationRepository;
     private final EmployeeRepository employeeRepository;
@@ -42,10 +41,9 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     private static final int THRESHOLD = 10; // минимальное количество медикаментов
 
     /**
-     * {@inheritDoc}
+     * Проверяет запасы медикаментов в аптеке и отправляет уведомления сотрудникам, если запасы ниже порогового значения.
      */
     @Scheduled(cron = "0 0 0 * * ?")
-    @Override
     public void checkInventory() {
         if (isEmailConfigured()) {
             Lock lock = redisLockRegistry.obtain("inventoryCheckLock");
@@ -82,9 +80,10 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     }
 
     /**
-     * {@inheritDoc}
+     * Отправляет уведомления сотрудникам аптеки о низких запасах медикаментов.
+     *
+     * @param medications список медикаментов с низким запасом
      */
-    @Override
     public void sendNotifications(List<PharmacyMedication> medications) {
         medications.stream()
                 .collect(Collectors.groupingBy(pm -> pm.getPharmacy().getId()))
@@ -97,7 +96,7 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
                         for (PharmacyMedication pm : pharmacyMedications) {
                             message.append("ID: ").append(pm.getMedication().getId())
                                     .append(", Наименование: ").append(pm.getMedication().getName())
-                                    .append(", Форма выпуска: ").append(pm.getMedication().getForm().name())
+                                    .append(", Форма выпуска: ").append(pm.getMedication().getMedicationForm().name())
                                     .append(", Цена: ").append(pm.getMedication().getPrice())
                                     .append(", Количество: ").append(pm.getQuantity())
                                     .append("\n");
@@ -113,9 +112,13 @@ public class InventoryCheckServiceImpl implements InventoryCheckService {
     }
 
     /**
-     * {@inheritDoc}
+     * Отправляет электронное письмо.
+     *
+     * @param to      адрес получателя
+     * @param subject тема письма
+     * @param text    текст письма
+     * @throws MessagingException если произошла ошибка при отправке письма
      */
-    @Override
     public void sendEmail(String to, String subject, String text) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);

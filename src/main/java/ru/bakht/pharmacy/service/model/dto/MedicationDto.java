@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Form;
+import ru.bakht.pharmacy.service.enums.MedicationForm;
 
 import java.time.LocalDate;
 
@@ -22,7 +22,7 @@ public class MedicationDto {
     String name;
 
     @NotNull(message = "Форма обязательна")
-    Form form;
+    MedicationForm medicationForm;
 
     @NotNull(message = "Цена обязательна")
     @DecimalMin(value = "0.0", inclusive = false, message = "Цена должна быть больше нуля")

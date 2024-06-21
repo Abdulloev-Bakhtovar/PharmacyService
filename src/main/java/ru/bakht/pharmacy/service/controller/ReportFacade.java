@@ -1,16 +1,16 @@
-package ru.bakht.pharmacy.service.controller.facade;
+package ru.bakht.pharmacy.service.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.bakht.pharmacy.service.enums.Format;
+import ru.bakht.pharmacy.service.enums.FileFormat;
 import ru.bakht.pharmacy.service.enums.ReportType;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
-import ru.bakht.pharmacy.service.service.factory.ReportFactory;
-import ru.bakht.pharmacy.service.service.ReportGenerator;
+import ru.bakht.pharmacy.service.service.report.ReportFactory;
+import ru.bakht.pharmacy.service.service.report.ReportGenerator;
 import ru.bakht.pharmacy.service.service.ReportRequestService;
-import ru.bakht.pharmacy.service.service.ReportService;
+import ru.bakht.pharmacy.service.service.report.ReportService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -44,27 +44,28 @@ public class ReportFacade {
         return reportService.getOutOfStockMedicationsByPharmacy(pharmacyId);
     }
 
-    public byte[] exportMedicationsByPharmacy(Long pharmacyId, Format format) throws IOException {
+    public byte[] exportMedicationsByPharmacy(Long pharmacyId, FileFormat fileFormat) throws IOException {
         List<MedicationDto> medications = reportService.getMedicationsByPharmacy(pharmacyId);
-        ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
+        ReportGenerator reportGenerator = reportFactory.getReportGenerator(fileFormat);
         return reportGenerator.generateMedicationsReport(medications);
     }
 
-    public byte[] exportTotalQuantityAndAmount(LocalDate startDate, LocalDate endDate, Format format) throws IOException {
+    public byte[] exportTotalQuantityAndAmount(
+            LocalDate startDate, LocalDate endDate, FileFormat fileFormat) throws IOException {
         TotalOrders totalOrders = reportService.getTotalQuantityAndAmount(startDate, endDate);
-        ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
+        ReportGenerator reportGenerator = reportFactory.getReportGenerator(fileFormat);
         return reportGenerator.generateTotalOrdersReport(totalOrders);
     }
 
-    public byte[] exportOrdersByCustomerPhone(String phone, Format format) throws IOException {
+    public byte[] exportOrdersByCustomerPhone(String phone, FileFormat fileFormat) throws IOException {
         List<OrderDto> orders = reportService.getOrdersByCustomerPhone(phone);
-        ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
+        ReportGenerator reportGenerator = reportFactory.getReportGenerator(fileFormat);
         return reportGenerator.generateOrdersReport(orders);
     }
 
-    public byte[] exportOutOfStockMedicationsByPharmacy(Long pharmacyId, Format format) throws IOException {
+    public byte[] exportOutOfStockMedicationsByPharmacy(Long pharmacyId, FileFormat fileFormat) throws IOException {
         List<MedicationDto> medications = reportService.getOutOfStockMedicationsByPharmacy(pharmacyId);
-        ReportGenerator reportGenerator = reportFactory.getReportGenerator(format);
+        ReportGenerator reportGenerator = reportFactory.getReportGenerator(fileFormat);
         return reportGenerator.generateMedicationsReport(medications);
     }
 }

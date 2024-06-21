@@ -7,15 +7,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.bakht.pharmacy.service.enums.Form;
-import ru.bakht.pharmacy.service.enums.Position;
-import ru.bakht.pharmacy.service.enums.Status;
+import ru.bakht.pharmacy.service.enums.EmployeePosition;
+import ru.bakht.pharmacy.service.enums.MedicationForm;
+import ru.bakht.pharmacy.service.enums.OrderStatus;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.OrderMapper;
 import ru.bakht.pharmacy.service.model.*;
 import ru.bakht.pharmacy.service.model.dto.*;
 import ru.bakht.pharmacy.service.repository.*;
-import ru.bakht.pharmacy.service.service.impl.OrderServiceImpl;
+import ru.bakht.pharmacy.service.service.OrderService;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderServiceImplTest {
+public class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
@@ -51,7 +51,7 @@ public class OrderServiceImplTest {
     private EntityManager entityManager;
 
     @InjectMocks
-    private OrderServiceImpl orderService;
+    private OrderService orderService;
 
     private Order order;
     private OrderDto orderDto;
@@ -63,20 +63,29 @@ public class OrderServiceImplTest {
 
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
-        pharmacy = new Pharmacy(1L, "Аптека №1", "ул. Ленина, 2", "89007654321", null);
-        employee = new Employee(1L, "Алексей Смирнов", Position.PHARMACIST, "alexey@example.com", pharmacy);
-        customer = new Customer(1L, "Мария Иванова", "ул. Ленина, 1", "89001234567");
-        medication = new Medication(1L, "Аспирин", Form.TABLET, 100.0, null);
-        pharmacyMedication = new PharmacyMedication(new PharmacyMedicationId(1L, 1L), pharmacy, medication, 50);
+        pharmacy = new Pharmacy(
+                1L, "Аптека №1", "ул. Ленина, 2", "89007654321", null);
+        employee = new Employee(
+                1L, "Алексей Смирнов", EmployeePosition.PHARMACIST, "alexey@example.com", pharmacy);
+        customer = new Customer(
+                1L, "Мария Иванова", "ул. Ленина, 1", "89001234567");
+        medication = new Medication(
+                1L, "Аспирин", MedicationForm.TABLET, 100.0, null);
+        pharmacyMedication = new PharmacyMedication(new PharmacyMedicationId(
+                1L, 1L), pharmacy, medication, 50);
 
         orderDto = new OrderDto();
         orderDto.setId(1L);
-        orderDto.setEmployeeDto(new EmployeeDto(1L, "Алексей Смирнов", Position.PHARMACIST, "alexey@example.com", null));
-        orderDto.setCustomerDto(new CustomerDto(1L, "Мария Иванова", "ул. Ленина, 1", "89001234567"));
-        orderDto.setPharmacyDto(new PharmacyDto(1L, "Аптека №1", "ул. Ленина, 2", "89007654321"));
-        orderDto.setMedicationDto(new MedicationDto(1L, "Аспирин", Form.TABLET, 100.0, null));
+        orderDto.setEmployeeDto(new EmployeeDto(
+                1L, "Алексей Смирнов", EmployeePosition.PHARMACIST, "alexey@example.com", null));
+        orderDto.setCustomerDto(new CustomerDto(
+                1L, "Мария Иванова", "ул. Ленина, 1", "89001234567"));
+        orderDto.setPharmacyDto(new PharmacyDto(
+                1L, "Аптека №1", "ул. Ленина, 2", "89007654321"));
+        orderDto.setMedicationDto(new MedicationDto(
+                1L, "Аспирин", MedicationForm.TABLET, 100.0, null));
         orderDto.setQuantity(2);
-        orderDto.setStatus(Status.NEW);
+        orderDto.setOrderStatus(OrderStatus.NEW);
 
         order = new Order();
         order.setId(1L);
@@ -85,11 +94,11 @@ public class OrderServiceImplTest {
         order.setPharmacy(pharmacy);
         order.setMedication(medication);
         order.setQuantity(2);
-        order.setStatus(Status.NEW);
+        order.setOrderStatus(OrderStatus.NEW);
         order.setOrderDate(LocalDate.now());
         order.setTotalAmount(200.0);
 
-        Field entityManagerField = OrderServiceImpl.class.getDeclaredField("entityManager");
+        Field entityManagerField = OrderService.class.getDeclaredField("entityManager");
         entityManagerField.setAccessible(true);
         entityManagerField.set(orderService, entityManager);
     }
@@ -99,7 +108,7 @@ public class OrderServiceImplTest {
         when(orderRepository.findAll()).thenReturn(List.of(order));
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
 
-        List<OrderDto> result = orderService.getAllOrders();
+        List<OrderDto> result = orderService.getAll();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -113,7 +122,7 @@ public class OrderServiceImplTest {
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
 
-        OrderDto result = orderService.getOrderById(1L);
+        OrderDto result = orderService.getById(1L);
 
         assertNotNull(result);
         assertEquals(orderDto, result);
@@ -127,7 +136,7 @@ public class OrderServiceImplTest {
 
         EntityNotFoundException thrown = assertThrows(
                 EntityNotFoundException.class,
-                () -> orderService.getOrderById(1L)
+                () -> orderService.getById(1L)
         );
 
         assertTrue(thrown.getMessage().contains("Заказ с ID 1 не найден"));
@@ -140,12 +149,13 @@ public class OrderServiceImplTest {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
         when(medicationRepository.findById(1L)).thenReturn(Optional.of(medication));
-        when(entityManager.find(eq(PharmacyMedication.class), any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
+        when(entityManager.find(eq(PharmacyMedication.class),
+                any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
         when(orderMapper.toEntity(any(OrderDto.class))).thenReturn(order);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
 
-        OrderDto result = orderService.createOrder(orderDto);
+        OrderDto result = orderService.create(orderDto);
 
         assertNotNull(result);
         assertEquals(orderDto, result);
@@ -160,11 +170,12 @@ public class OrderServiceImplTest {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
         when(medicationRepository.findById(1L)).thenReturn(Optional.of(medication));
-        when(entityManager.find(eq(PharmacyMedication.class), any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
+        when(entityManager.find(eq(PharmacyMedication.class),
+                any(PharmacyMedicationId.class))).thenReturn(pharmacyMedication);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
 
-        OrderDto result = orderService.updateOrder(1L, orderDto);
+        OrderDto result = orderService.update(1L, orderDto);
 
         assertNotNull(result);
         assertEquals(orderDto, result);
@@ -178,7 +189,7 @@ public class OrderServiceImplTest {
     void deleteOrderById_SuccessfulDeletion() {
         Long orderId = 10L;
 
-        orderService.deleteOrderById(orderId);
+        orderService.delete(orderId);
 
         verify(orderRepository, times(1)).deleteById(orderId);
     }

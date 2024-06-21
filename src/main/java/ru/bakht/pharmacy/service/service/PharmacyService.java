@@ -1,69 +1,157 @@
 package ru.bakht.pharmacy.service.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
+import ru.bakht.pharmacy.service.mapper.MedicationMapper;
+import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
+import ru.bakht.pharmacy.service.model.PharmacyMedication;
+import ru.bakht.pharmacy.service.model.PharmacyMedicationId;
 import ru.bakht.pharmacy.service.model.dto.PharmacyDto;
 import ru.bakht.pharmacy.service.model.dto.PharmacyMedicationDto;
+import ru.bakht.pharmacy.service.repository.PharmacyRepository;
 
 import java.util.List;
 
 /**
- * Интерфейс для управления аптеками.
+ * Реализация интерфейса {@link BaseService} для управления данными об аптеках.
  */
-public interface PharmacyService {
+@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class PharmacyService implements BaseService<PharmacyDto, Long> {
+
+    private final PharmacyRepository pharmacyRepository;
+    private final MedicationService medicationService;
+    private final PharmacyMapper pharmacyMapper;
+    private final MedicationMapper medicationMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
-     * Возвращает список всех аптек.
-     *
-     * @return список объектов PharmacyDto.
+     * {@inheritDoc}
      */
-    List<PharmacyDto> getAllPharmacies();
+    @Override
+    @Transactional(readOnly = true)
+    public List<PharmacyDto> getAll() {
+        log.info("Получение списка всех аптек");
+        return pharmacyRepository.findAll().stream()
+                .map(pharmacyMapper::toDto)
+                .toList();
+    }
 
     /**
-     * Ищет аптеку по ее идентификатору.
-     *
-     * @param id идентификатор аптеки.
-     * @return объект PharmacyDto, если аптека найдена.
-     * @throws EntityNotFoundException если аптека с указанным идентификатором не найдена.
+     * {@inheritDoc}
      */
-    PharmacyDto getPharmacyById(Long id);
+    @Override
+    @Transactional(readOnly = true)
+    public PharmacyDto getById(Long id) {
+        log.info("Получение аптеки с id {}", id);
+        return pharmacyRepository.findById(id)
+                .map(pharmacyMapper::toDto)
+                .orElseThrow(() -> {
+                    log.error("Аптека с id {} не найдена", id);
+                    return new EntityNotFoundException("Аптека", id);
+                });
+    }
 
     /**
-     * Создает новую аптеку.
-     *
-     * @param pharmacyDto данные для создания аптеки.
-     * @return созданный объект PharmacyDto.
+     * {@inheritDoc}
      */
-    PharmacyDto createPharmacy(PharmacyDto pharmacyDto);
+    @Override
+    public PharmacyDto create(PharmacyDto pharmacyDto) {
+        var id = pharmacyDto.getId();
+
+        if (id != null && pharmacyRepository.existsById(id)) {
+            log.info("Аптека с id {} уже существует, выполняется обновление данных", id);
+            return update(id, pharmacyDto);
+        }
+
+        log.info("Создание новой аптеки: {}", pharmacyDto);
+        var pharmacy = pharmacyRepository.save(pharmacyMapper.toEntity(pharmacyDto));
+        return pharmacyMapper.toDto(pharmacy);
+    }
 
     /**
-     * Обновляет существующую аптеку.
-     *
-     * @param id идентификатор аптеки.
-     * @param pharmacyDto данные для обновления аптеки.
-     * @return обновленный объект PharmacyDto.
-     * @throws EntityNotFoundException если аптека с указанным идентификатором не найдена.
+     * {@inheritDoc}
      */
-    PharmacyDto updatePharmacy(Long id, PharmacyDto pharmacyDto);
+    @Override
+    public PharmacyDto update(Long id, PharmacyDto pharmacyDto) {
+        log.info("Обновление данных аптеки: {}", pharmacyDto);
+        var existingPharmacy = pharmacyRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Аптека с id {} не найдена", id);
+                    return new EntityNotFoundException("Аптека", id);
+                });
+
+        pharmacyMapper.updateEntityFromDto(pharmacyDto, existingPharmacy);
+        return pharmacyMapper.toDto(pharmacyRepository.save(existingPharmacy));
+    }
 
     /**
-     * Удаляет аптеку по ее идентификатору.
-     *
-     * @param id идентификатор аптеки.
-     * @throws EntityNotFoundException если аптека с указанным идентификатором не найдена.
+     * {@inheritDoc}
      */
-    void deletePharmacyById(Long id);
+    @Override
+    public void delete(Long id) {
+        log.info("Удаление аптеки с id {}", id);
+        pharmacyRepository.deleteById(id);
+    }
 
     /**
-     * Добавляет лекарство в аптеку.
-     *
-     * @param pharmacyMedicationDto DTO с информацией о лекарстве и аптеке
+     * {@inheritDoc}
      */
-    void addOrUpdateMedication(PharmacyMedicationDto pharmacyMedicationDto);
+    public void addOrUpdatePharmacyMedication(PharmacyMedicationDto pharmacyMedicationDto) {
+        log.info("Создание или обновление записи о лекарстве в аптеке: {}", pharmacyMedicationDto);
+
+        var pharmacy = pharmacyMapper.toEntity(
+                getById(pharmacyMedicationDto.getPharmacyDto().getId())
+        );
+        var medication = medicationMapper.toEntity(
+                medicationService.getById(pharmacyMedicationDto.getMedicationDto().getId())
+        );
+
+        var pharmacyMedicationId = new PharmacyMedicationId(pharmacy.getId(), medication.getId());
+        var existingPharmacyMedication = entityManager.find(PharmacyMedication.class, pharmacyMedicationId);
+
+        if (existingPharmacyMedication != null) {
+            log.info("Запись PharmacyMedication с pharmacyId {} и medicationId {} уже существует, обновление количества",
+                    pharmacy.getId(), medication.getId());
+
+            existingPharmacyMedication.setQuantity(
+                    existingPharmacyMedication.getQuantity() + pharmacyMedicationDto.getQuantity()
+            );
+            entityManager.merge(existingPharmacyMedication);
+        } else {
+            var pharmacyMedication = PharmacyMedication.builder()
+                    .id(pharmacyMedicationId)
+                    .pharmacy(pharmacy)
+                    .medication(medication)
+                    .quantity(pharmacyMedicationDto.getQuantity())
+                    .build();
+            entityManager.merge(pharmacyMedication);
+        }
+    }
 
     /**
-     * Удаляет лекарство из аптеки.
-     *
-     * @param pharmacyMedicationDto DTO с информацией о лекарстве и аптеке
+     * {@inheritDoc}
      */
-    void removeMedication(PharmacyMedicationDto pharmacyMedicationDto);
+    public void deletePharmacyMedication(PharmacyMedicationDto pharmacyMedicationDto) {
+        log.info("Удаление лекарства из аптеки: {}", pharmacyMedicationDto);
+
+        var pharmacyId = pharmacyMedicationDto.getPharmacyDto().getId();
+        var medicationId = pharmacyMedicationDto.getMedicationDto().getId();
+        var pharmacyMedicationId = new PharmacyMedicationId(pharmacyId, medicationId);
+
+        var pharmacyMedication = entityManager.find(PharmacyMedication.class, pharmacyMedicationId);
+
+        if(pharmacyMedication != null) {
+            entityManager.remove(pharmacyMedication);
+        }
+    }
 }

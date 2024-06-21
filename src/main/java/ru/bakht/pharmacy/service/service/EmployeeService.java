@@ -1,54 +1,113 @@
 package ru.bakht.pharmacy.service.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
+import ru.bakht.pharmacy.service.mapper.EmployeeMapper;
+import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
+import ru.bakht.pharmacy.service.model.Employee;
+import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
+import ru.bakht.pharmacy.service.repository.EmployeeRepository;
 
 import java.util.List;
 
 /**
- * Интерфейс для управления сотрудниками.
+ * Реализация интерфейса {@link BaseService } для управления сотрудниками.
  */
-public interface EmployeeService {
+@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class EmployeeService implements BaseService<EmployeeDto, Long> {
+
+    private final EmployeeRepository employeeRepository;
+    private final PharmacyService pharmacyService;
+    private final EmployeeMapper employeeMapper;
+    private final PharmacyMapper pharmacyMapper;
 
     /**
-     * Возвращает список всех сотрудников.
-     *
-     * @return список объектов EmployeeDto.
+     * {@inheritDoc}
      */
-    List<EmployeeDto> getAllEmployees();
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeDto> getAll() {
+        log.info("Получение всех сотрудников");
+        return employeeRepository.findAll().stream()
+                .map(employeeMapper::toDto)
+                .toList();
+    }
 
     /**
-     * Ищет сотрудника по его идентификатору.
-     *
-     * @param id идентификатор сотрудника.
-     * @return объект EmployeeDto, если сотрудник найден.
-     * @throws EntityNotFoundException если сотрудник с указанным идентификатором не найден.
+     * {@inheritDoc}
      */
-    EmployeeDto getEmployeeById(Long id);
+    @Override
+    @Transactional(readOnly = true)
+    public EmployeeDto getById(Long id) {
+        log.info("Получение сотрудника с идентификатором {}", id);
+        return employeeRepository.findById(id)
+                .map(employeeMapper::toDto)
+                .orElseThrow(() -> {
+                    log.error("Сотрудник с идентификатором {} не найден", id);
+                    return new EntityNotFoundException("Сотрудник", id);
+                });
+    }
 
     /**
-     * Создает нового сотрудника.
-     *
-     * @param employeeDto данные для создания сотрудника.
-     * @return созданный объект EmployeeDto.
+     * {@inheritDoc}
      */
-    EmployeeDto createEmployee(EmployeeDto employeeDto);
+    @Override
+    public EmployeeDto create(EmployeeDto employeeDto) {
+        var id = employeeDto.getId();
+
+        if (id != null && employeeRepository.existsById(id)) {
+            log.info("Сотрудник с идентификатором {} уже существует, обновление сотрудника", id);
+            return update(id, employeeDto);
+        }
+
+        Pharmacy pharmacy = pharmacyMapper.toEntity(
+                pharmacyService.getById(employeeDto.getPharmacy().getId())
+        );
+
+        log.info("Создание нового сотрудника: {}", employeeDto);
+        Employee employee = employeeMapper.toEntity(employeeDto);
+        employee.setPharmacy(pharmacy);
+        employee = employeeRepository.save(employee);
+        return employeeMapper.toDto(employee);
+    }
+
 
     /**
-     * Обновляет существующего сотрудника.
-     *
-     * @param id идентификатор сотрудника.
-     * @param employeeDto данные для обновления сотрудника.
-     * @return обновленный объект EmployeeDto.
-     * @throws EntityNotFoundException если сотрудник с указанным идентификатором не найден.
+     * {@inheritDoc}
      */
-    EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto);
+    @Override
+    public EmployeeDto update(Long id, EmployeeDto employeeDto) {
+        log.info("Обновление сотрудника с идентификатором {}: {}", id, employeeDto);
+
+        Employee existingEmployee = employeeRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Сотрудник с идентификатором {} не найден", id);
+                    return new EntityNotFoundException("Сотрудник", id);
+                });
+
+        Pharmacy pharmacy = pharmacyMapper.toEntity(
+                pharmacyService.getById(employeeDto.getPharmacy().getId())
+        );
+
+        employeeMapper.updateEntityFromDto(employeeDto, existingEmployee);
+        existingEmployee.setPharmacy(pharmacy);
+        return employeeMapper.toDto(employeeRepository.save(existingEmployee));
+    }
 
     /**
-     * Удаляет сотрудника по его идентификатору.
-     *
-     * @param id идентификатор сотрудника.
-     * @throws EntityNotFoundException если сотрудник с указанным идентификатором не найден.
+     * {@inheritDoc}
      */
-    void deleteEmployeeById(Long id);
+    @Override
+    public void delete(Long id) {
+        log.info("Удаление сотрудника с идентификатором {}", id);
+        employeeRepository.deleteById(id);
+    }
+
 }

@@ -1,6 +1,7 @@
 package ru.bakht.pharmacy.service.enums;
 
-public enum Status {
+public enum OrderStatus {
+
     NEW,
     PROCESSING,
     COMPLETED,

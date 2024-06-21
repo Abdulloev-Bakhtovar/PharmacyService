@@ -1,4 +1,4 @@
-package ru.bakht.pharmacy.service.service.impl;
+package ru.bakht.pharmacy.service.service.report;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
-import ru.bakht.pharmacy.service.service.ReportGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class ExcelReportService implements ReportGenerator {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(medication.getId());
             row.createCell(1).setCellValue(medication.getName());
-            row.createCell(2).setCellValue(medication.getForm().name());
+            row.createCell(2).setCellValue(medication.getMedicationForm().name());
             row.createCell(3).setCellValue(medication.getPrice());
             Cell dateCell = row.createCell(4);
             LocalDate expirationDate = medication.getExpirationDate();
@@ -88,7 +87,7 @@ public class ExcelReportService implements ReportGenerator {
             row.createCell(3).setCellValue(order.getTotalAmount());
             Cell dateCell = row.createCell(4);
             dateCell.setCellValue(dateFormat.format(order.getOrderDate()));
-            row.createCell(5).setCellValue(order.getStatus().name());
+            row.createCell(5).setCellValue(order.getOrderStatus().name());
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

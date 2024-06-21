@@ -3,7 +3,7 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Form;
+import ru.bakht.pharmacy.service.enums.MedicationForm;
 
 import java.time.LocalDate;
 
@@ -26,7 +26,7 @@ public class Medication {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "form")
-    Form form;
+    MedicationForm medicationForm;
 
     @Column(name = "price")
     Double price;

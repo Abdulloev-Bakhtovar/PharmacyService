@@ -7,16 +7,16 @@ INSERT INTO public.pharmacies (name, address, phone) VALUES
 
 INSERT INTO public.medications (name, form, price, expiration_date) VALUES
     ('Paracetamol', 'TABLET', 50.00, '2025-12-31'),
-    ('Amoxicillin', 'TABLET', 120.50, '2024-11-30'),
-    ('Ibuprofen', 'TABLET', 85.75, '2023-10-31'),
-    ('Ceftriaxone', 'TABLET', 200.00, '2026-09-30'),
-    ('Loratadine', 'TABLET', 60.00, '2025-08-31');
+    ('Amoxicillin', 'SYRUP', 120.50, '2024-11-30'),
+    ('Ibuprofen', 'INJECTION', 85.75, '2023-10-31'),
+    ('Ceftriaxone', 'CAPSULE', 200.00, '2026-09-30'),
+    ('Loratadine', 'CREAM', 60.00, '2025-08-31');
 
 INSERT INTO public.employees (name, position, email, pharmacy_id) VALUES
-    ('Ivan Ivanov', 'PHARMACIST', 'abdulloev.b.03@gmail.com', 1),
+    ('Ivan Ivanov', 'MANAGER', 'abdulloev.b.03@gmail.com', 1),
     ('Petr Petrov', 'PHARMACIST', 'petrov@apteka2.ru', 2),
-    ('Sergey Sergeev', 'PHARMACIST', 'bakhtovar.abdulloev.03@mail.ru', 3),
-    ('Anna Annova', 'PHARMACIST', 'annova@apteka4.ru', 4),
+    ('Sergey Sergeev', 'ASSISTANT', 'bakht2003@mail.ru', 3),
+    ('Anna Annova', 'MANAGER', 'annova@apteka4.ru', 4),
     ('Maria Marieva', 'PHARMACIST', 'marieva@apteka5.ru', 5);
 
 INSERT INTO public.customers (name, address, phone) VALUES
@@ -27,11 +27,11 @@ INSERT INTO public.customers (name, address, phone) VALUES
     ('Dmitry Dmitriev', 'Vinogradnaya St., 3', '89269012345');
 
 INSERT INTO public.orders (customer_id, employee_id, pharmacy_id, medication_id, quantity, total_amount, order_date, status) VALUES
-    (1, 1, 1, 1, 2, 100.00, '2023-01-15', 'PROCESSING'),
+    (1, 1, 1, 1, 2, 100.00, '2023-01-15', 'NEW'),
     (2, 2, 2, 2, 1, 100.00, '2023-02-15', 'PROCESSING'),
-    (3, 3, 3, 3, 3, 90.00, '2023-03-15', 'PROCESSING'),
-    (4, 4, 4, 4, 4, 280.00, '2023-04-15', 'PROCESSING'),
-    (5, 5, 5, 5, 5, 200.00, '2023-05-15', 'PROCESSING');
+    (3, 3, 3, 3, 3, 90.00, '2023-03-15', 'COMPLETED'),
+    (4, 4, 4, 4, 4, 280.00, '2023-04-15', 'NEW'),
+    (5, 5, 5, 5, 5, 200.00, '2023-05-15', 'CANCELLED');
 
 INSERT INTO public.pharmacy_medications (pharmacy_id, medication_id, quantity) VALUES
     (1, 1, 50),

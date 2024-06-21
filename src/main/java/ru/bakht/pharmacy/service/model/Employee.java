@@ -3,7 +3,7 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Position;
+import ru.bakht.pharmacy.service.enums.EmployeePosition;
 
 
 @Data
@@ -27,7 +27,7 @@ public class Employee {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "position")
-    Position position;
+    EmployeePosition employeePosition;
 
     @Column(name = "email")
     String email;

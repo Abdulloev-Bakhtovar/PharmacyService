@@ -1,8 +1,8 @@
 package ru.bakht.pharmacy.service.enums;
 
-public enum Position {
+public enum EmployeePosition {
+
     MANAGER,
     PHARMACIST,
     ASSISTANT
-
 }

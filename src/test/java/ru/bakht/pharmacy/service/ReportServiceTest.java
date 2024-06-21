@@ -16,7 +16,7 @@ import ru.bakht.pharmacy.service.model.dto.TotalOrders;
 import ru.bakht.pharmacy.service.model.dto.TotalOrdersProjection;
 import ru.bakht.pharmacy.service.repository.MedicationRepository;
 import ru.bakht.pharmacy.service.repository.OrderRepository;
-import ru.bakht.pharmacy.service.service.impl.ReportServiceImpl;
+import ru.bakht.pharmacy.service.service.report.ReportService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ReportServiceImplTest {
+class ReportServiceTest {
 
     @Mock
     private MedicationRepository medicationRepository;
@@ -40,7 +40,7 @@ class ReportServiceImplTest {
     private OrderMapper orderMapper;
 
     @InjectMocks
-    private ReportServiceImpl reportService;
+    private ReportService reportService;
 
     private Long pharmacyId;
     private String customerPhone;
