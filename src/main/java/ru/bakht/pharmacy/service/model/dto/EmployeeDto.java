@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Position;
+import ru.bakht.pharmacy.service.enums.EmployeePosition;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +20,7 @@ public class EmployeeDto {
     String name;
 
     @NotNull(message = "Должность обязательна")
-    Position position;
+    EmployeePosition employeePosition;
 
     @Email(message = "Электронная почта должна быть действительной")
     String email;

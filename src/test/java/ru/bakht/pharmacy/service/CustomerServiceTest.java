@@ -11,7 +11,7 @@ import ru.bakht.pharmacy.service.mapper.CustomerMapper;
 import ru.bakht.pharmacy.service.model.Customer;
 import ru.bakht.pharmacy.service.model.dto.CustomerDto;
 import ru.bakht.pharmacy.service.repository.CustomerRepository;
-import ru.bakht.pharmacy.service.service.impl.CustomerServiceImpl;
+import ru.bakht.pharmacy.service.service.CustomerService;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CustomerServiceImplTest {
+public class CustomerServiceTest {
 
     @Mock
     private CustomerRepository customerRepository;
@@ -30,7 +30,7 @@ public class CustomerServiceImplTest {
     private CustomerMapper customerMapper;
 
     @InjectMocks
-    private CustomerServiceImpl customerService;
+    private CustomerService customerService;
 
     private Customer customer;
     private CustomerDto customerDto;
@@ -46,7 +46,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.findAll()).thenReturn(List.of(customer));
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDto);
 
-        List<CustomerDto> customers = customerService.getAllCustomers();
+        List<CustomerDto> customers = customerService.getAll();
 
         assertNotNull(customers);
         assertEquals(1, customers.size());
@@ -60,7 +60,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDto);
 
-        CustomerDto result = customerService.getCustomerById(1L);
+        CustomerDto result = customerService.getById(1L);
 
         assertNotNull(result);
         assertEquals("Bakha", result.getName());
@@ -74,7 +74,7 @@ public class CustomerServiceImplTest {
 
         EntityNotFoundException thrown = assertThrows(
                 EntityNotFoundException.class,
-                () -> customerService.getCustomerById(1L),
+                () -> customerService.getById(1L),
                 "Expected getCustomerById to throw, but it didn't"
         );
 
@@ -89,7 +89,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDto);
 
-        CustomerDto result = customerService.createCustomer(customerDto);
+        CustomerDto result = customerService.create(customerDto);
 
         assertNotNull(result);
         assertEquals("Bakha", result.getName());
@@ -104,7 +104,7 @@ public class CustomerServiceImplTest {
         when(customerRepository.save(any(Customer.class))).thenReturn(customer);
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDto);
 
-        CustomerDto result = customerService.updateCustomer(1L, customerDto);
+        CustomerDto result = customerService.update(1L, customerDto);
 
         assertNotNull(result);
         assertEquals("Bakha", result.getName());
@@ -119,7 +119,7 @@ public class CustomerServiceImplTest {
 
         EntityNotFoundException thrown = assertThrows(
                 EntityNotFoundException.class,
-                () -> customerService.updateCustomer(1L, customerDto),
+                () -> customerService.update(1L, customerDto),
                 "Expected updateCustomer to throw, but it didn't"
         );
 
@@ -132,7 +132,7 @@ public class CustomerServiceImplTest {
     void deleteCustomerById_SuccessfulDeletion() {
         Long customerId = 1L;
 
-        customerService.deleteCustomerById(customerId);
+        customerService.delete(customerId);
 
         verify(customerRepository, times(1)).deleteById(customerId);
     }

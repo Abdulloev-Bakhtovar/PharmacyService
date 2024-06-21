@@ -1,6 +1,7 @@
 package ru.bakht.pharmacy.service.enums;
 
-public enum Form {
+public enum MedicationForm {
+
     TABLET,
     SYRUP,
     INJECTION,

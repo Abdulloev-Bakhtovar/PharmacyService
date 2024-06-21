@@ -3,7 +3,7 @@ package ru.bakht.pharmacy.service.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Status;
+import ru.bakht.pharmacy.service.enums.OrderStatus;
 
 import java.time.LocalDate;
 
@@ -49,5 +49,5 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    Status status;
+    OrderStatus orderStatus;
 }

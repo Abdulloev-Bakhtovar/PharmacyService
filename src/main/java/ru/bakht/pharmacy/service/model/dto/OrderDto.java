@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import ru.bakht.pharmacy.service.enums.Status;
+import ru.bakht.pharmacy.service.enums.OrderStatus;
 
 import java.time.LocalDate;
 
@@ -40,5 +40,5 @@ public class OrderDto {
     LocalDate orderDate;
 
     @NotNull(message = "Статус обязателен")
-    Status status;
+    OrderStatus orderStatus;
 }

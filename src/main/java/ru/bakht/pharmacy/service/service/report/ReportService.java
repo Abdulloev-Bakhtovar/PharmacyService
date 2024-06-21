@@ -1,4 +1,4 @@
-package ru.bakht.pharmacy.service.service.impl;
+package ru.bakht.pharmacy.service.service.report;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,19 +12,19 @@ import ru.bakht.pharmacy.service.model.dto.TotalOrders;
 import ru.bakht.pharmacy.service.model.dto.TotalOrdersProjection;
 import ru.bakht.pharmacy.service.repository.MedicationRepository;
 import ru.bakht.pharmacy.service.repository.OrderRepository;
-import ru.bakht.pharmacy.service.service.ReportService;
 
+import java.util.function.Function;
 import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Реализация интерфейса {@link ReportService} для генерации отчетов, связанных с медикаментами и заказами.
+ * Класс для генерации отчетов, связанных с медикаментами и заказами.
  */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ReportServiceImpl implements ReportService {
+public class ReportService {
 
     private final MedicationRepository medicationRepository;
     private final OrderRepository orderRepository;
@@ -32,7 +32,10 @@ public class ReportServiceImpl implements ReportService {
     private final OrderMapper orderMapper;
 
     /**
-     * {@inheritDoc}
+     * Получает список медикаментов, доступных в конкретной аптеке.
+     *
+     * @param pharmacyId ID аптеки
+     * @return список {@link MedicationDto}, представляющих медикаменты, доступные в аптеке
      */
     public List<MedicationDto> getMedicationsByPharmacy(Long pharmacyId) {
         log.info("Получен запрос на получение лекарств для аптеки с id {}", pharmacyId);
@@ -42,7 +45,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * {@inheritDoc}
+     * Получает общее количество и общую стоимость всех заказов за указанный период.
+     *
+     * @param startDate начальная дата периода
+     * @param endDate конечная дата периода
+     * @return объект {@link TotalOrders}, содержащий общее количество и общую стоимость заказов
      */
     public TotalOrders getTotalQuantityAndAmount(LocalDate startDate, LocalDate endDate) {
         log.info("Получен запрос на получение общего количества и суммы заказов с {} по {}", startDate, endDate);
@@ -54,7 +61,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * {@inheritDoc}
+     * Получает список заказов, сделанных конкретным клиентом по его номеру телефона.
+     *
+     * @param phone номер телефона клиента
+     * @return список {@link OrderDto}, представляющих заказы, сделанные клиентом
      */
     public List<OrderDto> getOrdersByCustomerPhone(String phone) {
         log.info("Получен запрос на получение заказов для клиента с телефоном {}", phone);
@@ -63,7 +73,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * {@inheritDoc}
+     * Получает список медикаментов, которые закончились в аптека по id аптека.
+     *
+     * @param pharmacyId номер телефона клиента
+     * @return список {@link MedicationDto}, представляющих медикаменты, которые закончились на складе
      */
     public List<MedicationDto> getOutOfStockMedicationsByPharmacy(Long pharmacyId) {
         log.info("Получен запрос на получение отсутствующих лекарств для аптеки с id {}", pharmacyId);
@@ -82,7 +95,7 @@ public class ReportServiceImpl implements ReportService {
      * @param mapper функция для маппинга сущности в DTO
      * @return список DTO
      */
-    private <T, R> List<R> mapToDto(List<T> entities, java.util.function.Function<T, R> mapper) {
+    private <T, R> List<R> mapToDto(List<T> entities, Function<T, R> mapper) {
         return entities.stream().map(mapper).toList();
     }
 }

@@ -1,4 +1,4 @@
-package ru.bakht.pharmacy.service.service.impl;
+package ru.bakht.pharmacy.service.service.report;
 
 import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.font.PdfFont;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
-import ru.bakht.pharmacy.service.service.ReportGenerator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,7 +49,7 @@ public class PdfReportService implements ReportGenerator {
         for (MedicationDto medication : medications) {
             table.addCell(new Paragraph(medication.getId().toString()).setFont(font));
             table.addCell(new Paragraph(medication.getName()).setFont(font));
-            table.addCell(new Paragraph(medication.getForm().name()).setFont(font));
+            table.addCell(new Paragraph(medication.getMedicationForm().name()).setFont(font));
             table.addCell(new Paragraph(medication.getPrice().toString()).setFont(font));
             table.addCell(new Paragraph(dateFormat.format(medication.getExpirationDate())).setFont(font));
         }
@@ -91,7 +90,7 @@ public class PdfReportService implements ReportGenerator {
             table.addCell(new Paragraph(order.getQuantity().toString()).setFont(font));
             table.addCell(new Paragraph(order.getTotalAmount().toString()).setFont(font));
             table.addCell(new Paragraph(dateFormat.format(order.getOrderDate())).setFont(font));
-            table.addCell(new Paragraph(order.getStatus().name()).setFont(font));
+            table.addCell(new Paragraph(order.getOrderStatus().name()).setFont(font));
         }
 
         document.add(table);

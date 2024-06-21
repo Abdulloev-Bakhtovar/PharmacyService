@@ -11,7 +11,7 @@ import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
 import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.PharmacyDto;
 import ru.bakht.pharmacy.service.repository.PharmacyRepository;
-import ru.bakht.pharmacy.service.service.impl.PharmacyServiceImpl;
+import ru.bakht.pharmacy.service.service.PharmacyService;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PharmacyServiceImplTest {
+public class PharmacyServiceTest {
 
     @Mock
     private PharmacyRepository pharmacyRepository;
@@ -30,15 +30,17 @@ public class PharmacyServiceImplTest {
     private PharmacyMapper pharmacyMapper;
 
     @InjectMocks
-    private PharmacyServiceImpl pharmacyService;
+    private PharmacyService pharmacyService;
 
     private Pharmacy pharmacy;
     private PharmacyDto pharmacyDto;
 
     @BeforeEach
     void setUp() {
-        pharmacy = new Pharmacy(1L, "Аптека №1", "ул. Ленина, 2", "89007654321", null);
-        pharmacyDto = new PharmacyDto(1L, "Аптека №1", "ул. Ленина, 2", "89007654321");
+        pharmacy = new Pharmacy(
+                1L, "Аптека №1", "ул. Ленина, 2", "89007654321", null);
+        pharmacyDto = new PharmacyDto(
+                1L, "Аптека №1", "ул. Ленина, 2", "89007654321");
     }
 
     @Test
@@ -46,7 +48,7 @@ public class PharmacyServiceImplTest {
         when(pharmacyRepository.findAll()).thenReturn(List.of(pharmacy));
         when(pharmacyMapper.toDto(any(Pharmacy.class))).thenReturn(pharmacyDto);
 
-        List<PharmacyDto> result = pharmacyService.getAllPharmacies();
+        List<PharmacyDto> result = pharmacyService.getAll();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -60,7 +62,7 @@ public class PharmacyServiceImplTest {
         when(pharmacyRepository.findById(1L)).thenReturn(Optional.of(pharmacy));
         when(pharmacyMapper.toDto(any(Pharmacy.class))).thenReturn(pharmacyDto);
 
-        PharmacyDto result = pharmacyService.getPharmacyById(1L);
+        PharmacyDto result = pharmacyService.getById(1L);
 
         assertNotNull(result);
         assertEquals(pharmacyDto, result);
@@ -74,7 +76,7 @@ public class PharmacyServiceImplTest {
 
         EntityNotFoundException thrown = assertThrows(
                 EntityNotFoundException.class,
-                () -> pharmacyService.getPharmacyById(1L)
+                () -> pharmacyService.getById(1L)
         );
 
         assertTrue(thrown.getMessage().contains("Аптека"));
@@ -88,7 +90,7 @@ public class PharmacyServiceImplTest {
         when(pharmacyMapper.toEntity(any(PharmacyDto.class))).thenReturn(pharmacy);
         when(pharmacyMapper.toDto(any(Pharmacy.class))).thenReturn(pharmacyDto);
 
-        PharmacyDto result = pharmacyService.createPharmacy(pharmacyDto);
+        PharmacyDto result = pharmacyService.create(pharmacyDto);
 
         assertNotNull(result);
         assertEquals(pharmacyDto, result);
@@ -102,7 +104,7 @@ public class PharmacyServiceImplTest {
         when(pharmacyRepository.save(any(Pharmacy.class))).thenReturn(pharmacy);
         when(pharmacyMapper.toDto(any(Pharmacy.class))).thenReturn(pharmacyDto);
 
-        PharmacyDto result = pharmacyService.updatePharmacy(1L, pharmacyDto);
+        PharmacyDto result = pharmacyService.update(1L, pharmacyDto);
 
         assertNotNull(result);
         assertEquals(pharmacyDto, result);
@@ -116,7 +118,7 @@ public class PharmacyServiceImplTest {
 
         EntityNotFoundException thrown = assertThrows(
                 EntityNotFoundException.class,
-                () -> pharmacyService.updatePharmacy(1L, pharmacyDto)
+                () -> pharmacyService.update(1L, pharmacyDto)
         );
 
         assertTrue(thrown.getMessage().contains("Аптека"));
@@ -127,7 +129,7 @@ public class PharmacyServiceImplTest {
     void deletePharmacyById_SuccessfulDeletion() {
         Long pharmacyId = 10L;
 
-        pharmacyService.deletePharmacyById(pharmacyId);
+        pharmacyService.delete(pharmacyId);
 
         verify(pharmacyRepository, times(1)).deleteById(pharmacyId);
     }
