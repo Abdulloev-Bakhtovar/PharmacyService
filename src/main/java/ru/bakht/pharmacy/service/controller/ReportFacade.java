@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.bakht.pharmacy.service.enums.FileFormat;
 import ru.bakht.pharmacy.service.enums.ReportType;
+import ru.bakht.pharmacy.service.feign.ReportServiceClient;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.model.dto.TotalOrders;
 import ru.bakht.pharmacy.service.service.report.ReportFactory;
 import ru.bakht.pharmacy.service.service.report.ReportGenerator;
-import ru.bakht.pharmacy.service.service.ReportRequestService;
 import ru.bakht.pharmacy.service.service.report.ReportService;
 
 import java.io.IOException;
@@ -22,25 +22,25 @@ public class ReportFacade {
 
     private final ReportFactory reportFactory;
     private final ReportService reportService;
-    private final ReportRequestService reportRequestService;
+    private final ReportServiceClient reportServiceClient;
 
     public List<MedicationDto> getMedicationsByPharmacy(Long pharmacyId) {
-        reportRequestService.recordReportRequest(ReportType.MEDICATIONS);
+        reportServiceClient.recordReportRequest(ReportType.MEDICATIONS);
         return reportService.getMedicationsByPharmacy(pharmacyId);
     }
 
     public TotalOrders getTotalQuantityAndAmount(LocalDate startDate, LocalDate endDate) {
-        reportRequestService.recordReportRequest(ReportType.TOTAL_ORDERS);
+        reportServiceClient.recordReportRequest(ReportType.TOTAL_ORDERS);
         return reportService.getTotalQuantityAndAmount(startDate, endDate);
     }
 
     public List<OrderDto> getOrdersByCustomerPhone(String phone) {
-        reportRequestService.recordReportRequest(ReportType.CUSTOMER_ORDERS);
+        reportServiceClient.recordReportRequest(ReportType.CUSTOMER_ORDERS);
         return reportService.getOrdersByCustomerPhone(phone);
     }
 
     public List<MedicationDto> getOutOfStockMedicationsByPharmacy(Long pharmacyId) {
-        reportRequestService.recordReportRequest(ReportType.OUT_OF_STOCK_MEDICATIONS);
+        reportServiceClient.recordReportRequest(ReportType.OUT_OF_STOCK_MEDICATIONS);
         return reportService.getOutOfStockMedicationsByPharmacy(pharmacyId);
     }
 
