@@ -6,14 +6,14 @@ networks:
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:25.0.0
+    image: quay.io/keycloak/keycloak:latest
     container_name: pharmacy-keycloak
-    hostname: pharmacy-keycloak
+    command: start-dev
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+    hostname: pharmacy-keycloak
     ports:
       - "8080:8080"
-    command: start-dev
     networks:
       - pharmacy_network

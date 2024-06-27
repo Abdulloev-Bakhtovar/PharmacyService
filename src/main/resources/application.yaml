@@ -1,11 +1,11 @@
 spring:
   application:
-    name: PharmacyService
+    name: ${SPRING_APPLICATION_NAME:pharmacy-service}
 
   datasource:
-    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/pharmacy_db}"
-    username: "${SPRING_DATASOURCE_USERNAME:postgres}"
-    password: "${SPRING_DATASOURCE_PASSWORD:root}"
+    url: "${SPRING_DATASOURCE_URL:}"
+    username: "${SPRING_DATASOURCE_USERNAME:}"
+    password: "${SPRING_DATASOURCE_PASSWORD:}"
   jpa:
     hibernate:
       ddl-auto: update
@@ -39,16 +39,16 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "${SPRING_OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
+          issuer-uri: "${SPRING_OAUTH2_ISSUER_URI:}"
       client:
         provider:
           keycloak:
-            issuer-uri: "${SPRING_OAUTH2_ISSUER_URI:http://pharmacy-keycloak:8080/realms/pharmacy-realm}"
+            issuer-uri: "${SPRING_OAUTH2_ISSUER_URI:}"
             user-name-attribute: preferred_username
         registration:
           keycloak:
-            client-id: "${SPRING_KEYCLOAK_CLIENT_ID:pharmacy-client}"
-            client-secret: "${SPRING_KEYCLOAK_CLIENT_SECRET:pLgjRsv0J30klbROqjshjrEfBzPwnceC}"
+            client-id: "${SPRING_KEYCLOAK_CLIENT_ID:}"
+            client-secret: "${SPRING_KEYCLOAK_CLIENT_SECRET:}"
             scope:
               - email
               - profile
@@ -57,6 +57,13 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:}
+  instance:
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:}
 
 server:
   port: "${SERVER_PORT:8081}"

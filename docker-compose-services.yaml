@@ -8,6 +8,7 @@ services:
   redis:
     image: redis:6.2
     container_name: pharmacy-redis
+    hostname: redis
     ports:
       - "6379:6379"
     networks:
@@ -19,9 +20,10 @@ services:
     environment:
       POSTGRES_DB: pharmacy_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root
+      POSTGRES_PASSWORD: postgres
+    hostname: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - pharmacy_network
 
@@ -31,16 +33,19 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      SPRING_APPLICATION_NAME: pharmacy-service
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pharmacy_db
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_MAIL_USERNAME:
       SPRING_MAIL_PASSWORD:
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
       SPRING_OAUTH2_ISSUER_URI: http://pharmacy-keycloak:8080/realms/pharmacy-realm
       SPRING_KEYCLOAK_CLIENT_ID: pharmacy-client
-      SPRING_KEYCLOAK_CLIENT_SECRET: pLgjRsv0J30klbROqjshjrEfBzPwnceC
+      SPRING_KEYCLOAK_CLIENT_SECRET: rmsBgx8lzoEf7wji0NQmv5kjYL5bf9OF
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
       SERVER_PORT: 8081
     ports:
       - "8081:8081"
