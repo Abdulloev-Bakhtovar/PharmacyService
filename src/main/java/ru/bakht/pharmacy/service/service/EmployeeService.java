@@ -2,6 +2,7 @@ package ru.bakht.pharmacy.service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
@@ -11,6 +12,7 @@ import ru.bakht.pharmacy.service.model.Employee;
 import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.dto.EmployeeDto;
 import ru.bakht.pharmacy.service.repository.EmployeeRepository;
+import ru.bakht.pharmacy.service.specification.EmployeeSpecification;
 
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class EmployeeService implements BaseService<EmployeeDto, Long> {
     private final PharmacyService pharmacyService;
     private final EmployeeMapper employeeMapper;
     private final PharmacyMapper pharmacyMapper;
+
 
     /**
      * {@inheritDoc}
@@ -108,6 +111,23 @@ public class EmployeeService implements BaseService<EmployeeDto, Long> {
     public void delete(Long id) {
         log.info("Удаление сотрудника с идентификатором {}", id);
         employeeRepository.deleteById(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional(readOnly = true)
+    public List<EmployeeDto> getByFilters(EmployeeDto employeeDto) {
+        log.info("Фильтрация сотрудников по заданным критериям");
+        Specification<Employee> spec = Specification.where(EmployeeSpecification.hasName(employeeDto.getName()))
+                .and(EmployeeSpecification.hasPosition(employeeDto.getPosition()))
+                .and(EmployeeSpecification.hasEmail(employeeDto.getEmail()))
+                .and(EmployeeSpecification.hasPharmacyId(employeeDto.getPharmacy() != null ?
+                        employeeDto.getPharmacy().getId() : null));
+
+        return employeeRepository.findAll(spec).stream()
+                .map(employeeMapper::toDto)
+                .toList();
     }
 
 }

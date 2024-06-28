@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
@@ -13,6 +14,7 @@ import ru.bakht.pharmacy.service.model.PharmacyMedication;
 import ru.bakht.pharmacy.service.model.PharmacyMedicationId;
 import ru.bakht.pharmacy.service.model.dto.OrderDto;
 import ru.bakht.pharmacy.service.repository.*;
+import ru.bakht.pharmacy.service.specification.OrderSpecification;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -122,6 +124,32 @@ public class OrderService implements BaseService<OrderDto, Long> {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Transactional(readOnly = true)
+    public List<OrderDto> getByFilters(OrderDto orderDto) {
+        log.info("Фильтрация заказов по заданным критериям");
+
+        Specification<Order> specification = Specification.where(orderDto.getCustomer() != null ?
+                        OrderSpecification.hasCustomerId(orderDto.getCustomer().getId()) : null)
+                .and(orderDto.getEmployee() != null ?
+                        OrderSpecification.hasEmployeeId(orderDto.getEmployee().getId()) : null)
+                .and(orderDto.getPharmacy() != null ?
+                        OrderSpecification.hasPharmacyId(orderDto.getPharmacy().getId()) : null)
+                .and(orderDto.getMedication() != null ?
+                        OrderSpecification.hasMedicationId(orderDto.getMedication().getId()) : null)
+                .and(orderDto.getOrderStatus() != null ?
+                        OrderSpecification.hasOrderStatus(orderDto.getOrderStatus()) : null)
+                .and(orderDto.getOrderDate() != null ?
+                        OrderSpecification.hasOrderDate(orderDto.getOrderDate()) : null);
+
+        return orderRepository.findAll(specification).stream()
+                .map(orderMapper::toDto)
+                .toList();
+    }
+
+
+    /**
      * Проверяет наличие связанных сущностей по их идентификаторам в DTO.
      * и устанавливает связанные сущности в объекте Order на основе данных из DTO.
      *
@@ -129,10 +157,10 @@ public class OrderService implements BaseService<OrderDto, Long> {
      * @param orderDto объект OrderDto с новыми данными
      */
     private void validateAndSetRelatedEntities(Order order, OrderDto orderDto) {
-        Long employeeId = orderDto.getEmployeeDto().getId();
-        Long customerId = orderDto.getCustomerDto().getId();
-        Long pharmacyId = orderDto.getPharmacyDto().getId();
-        Long medicationId = orderDto.getMedicationDto().getId();
+        Long employeeId = orderDto.getEmployee().getId();
+        Long customerId = orderDto.getCustomer().getId();
+        Long pharmacyId = orderDto.getPharmacy().getId();
+        Long medicationId = orderDto.getMedication().getId();
 
         var employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Сотрудник", employeeId));
@@ -169,8 +197,8 @@ public class OrderService implements BaseService<OrderDto, Long> {
      * @param orderDto объект OrderDto
      */
     private void updatePharmacyMedicationQuantity(OrderDto orderDto) {
-        Long pharmacyId = orderDto.getPharmacyDto().getId();
-        Long medicationId = orderDto.getMedicationDto().getId();
+        Long pharmacyId = orderDto.getPharmacy().getId();
+        Long medicationId = orderDto.getMedication().getId();
         var pharmacyMedication = entityManager.find(
                 PharmacyMedication.class, new PharmacyMedicationId(pharmacyId, medicationId)
         );

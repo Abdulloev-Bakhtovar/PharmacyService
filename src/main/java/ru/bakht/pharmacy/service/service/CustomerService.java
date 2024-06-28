@@ -2,12 +2,15 @@ package ru.bakht.pharmacy.service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.CustomerMapper;
+import ru.bakht.pharmacy.service.model.Customer;
 import ru.bakht.pharmacy.service.model.dto.CustomerDto;
 import ru.bakht.pharmacy.service.repository.CustomerRepository;
+import ru.bakht.pharmacy.service.specification.CustomerSpecification;
 
 import java.util.List;
 
@@ -90,5 +93,20 @@ public class CustomerService implements BaseService<CustomerDto, Long> {
     public void delete(Long id) {
         log.info("Удаление клиента с идентификатором {}", id);
         customerRepository.deleteById(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional(readOnly = true)
+    public List<CustomerDto> getByFilters(CustomerDto criteria) {
+        log.info("Фильтрация клиента по заданным критериям");
+        Specification<Customer> spec = Specification.where(CustomerSpecification.hasName(criteria.getName()))
+                .and(CustomerSpecification.hasAddress(criteria.getAddress()))
+                .and(CustomerSpecification.hasPhone(criteria.getPhone()));
+
+        return customerRepository.findAll(spec).stream()
+                .map(customerMapper::toDto)
+                .toList();
     }
 }

@@ -6,7 +6,7 @@ networks:
 
 services:
   keycloak:
-    image: quay.io/keycloak/keycloak:latest
+    image: pharmacy-keycloak/test-image:latest
     container_name: pharmacy-keycloak
     command: start-dev
     environment:

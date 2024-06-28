@@ -45,7 +45,7 @@ public class ExcelReportService implements ReportGenerator {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(medication.getId());
             row.createCell(1).setCellValue(medication.getName());
-            row.createCell(2).setCellValue(medication.getMedicationForm().name());
+            row.createCell(2).setCellValue(medication.getForm().name());
             row.createCell(3).setCellValue(medication.getPrice());
             Cell dateCell = row.createCell(4);
             LocalDate expirationDate = medication.getExpirationDate();
@@ -82,7 +82,7 @@ public class ExcelReportService implements ReportGenerator {
         for (OrderDto order : orders) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(order.getId());
-            row.createCell(1).setCellValue(order.getMedicationDto().getName());
+            row.createCell(1).setCellValue(order.getMedication().getName());
             row.createCell(2).setCellValue(order.getQuantity());
             row.createCell(3).setCellValue(order.getTotalAmount());
             Cell dateCell = row.createCell(4);

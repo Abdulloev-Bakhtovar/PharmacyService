@@ -22,7 +22,7 @@ public class MedicationDto {
     String name;
 
     @NotNull(message = "Форма обязательна")
-    MedicationForm medicationForm;
+    MedicationForm form;
 
     @NotNull(message = "Цена обязательна")
     @DecimalMin(value = "0.0", inclusive = false, message = "Цена должна быть больше нуля")
@@ -30,6 +30,4 @@ public class MedicationDto {
 
     @NotNull(message = "Дата истечения срока обязательна")
     LocalDate expirationDate;
-
-
 }

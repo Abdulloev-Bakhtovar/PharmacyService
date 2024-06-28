@@ -76,13 +76,13 @@ public class OrderServiceTest {
 
         orderDto = new OrderDto();
         orderDto.setId(1L);
-        orderDto.setEmployeeDto(new EmployeeDto(
+        orderDto.setEmployee(new EmployeeDto(
                 1L, "Алексей Смирнов", EmployeePosition.PHARMACIST, "alexey@example.com", null));
-        orderDto.setCustomerDto(new CustomerDto(
+        orderDto.setCustomer(new CustomerDto(
                 1L, "Мария Иванова", "ул. Ленина, 1", "89001234567"));
-        orderDto.setPharmacyDto(new PharmacyDto(
+        orderDto.setPharmacy(new PharmacyDto(
                 1L, "Аптека №1", "ул. Ленина, 2", "89007654321"));
-        orderDto.setMedicationDto(new MedicationDto(
+        orderDto.setMedication(new MedicationDto(
                 1L, "Аспирин", MedicationForm.TABLET, 100.0, null));
         orderDto.setQuantity(2);
         orderDto.setOrderStatus(OrderStatus.NEW);

@@ -49,7 +49,7 @@ class MedicationServiceTest {
         assertEquals(1, medications.size());
         assertEquals(1L, medications.getFirst().getId());
         assertEquals("Aspirin", medications.getFirst().getName());
-        assertEquals(MedicationForm.TABLET, medications.getFirst().getMedicationForm());
+        assertEquals(MedicationForm.TABLET, medications.getFirst().getForm());
         assertEquals(100.0, medications.getFirst().getPrice());
 
         verify(medicationRepository, times(1)).findAll();
@@ -70,7 +70,7 @@ class MedicationServiceTest {
 
         assertEquals(1L, foundMedication.getId());
         assertEquals("Aspirin", foundMedication.getName());
-        assertEquals(MedicationForm.TABLET, foundMedication.getMedicationForm());
+        assertEquals(MedicationForm.TABLET, foundMedication.getForm());
         assertEquals(100.0, foundMedication.getPrice());
 
         verify(medicationRepository, times(1)).findById(1L);
@@ -115,7 +115,7 @@ class MedicationServiceTest {
 
         assertEquals(1L, createdMedication.getId());
         assertEquals("Aspirin", createdMedication.getName());
-        assertEquals(MedicationForm.TABLET, createdMedication.getMedicationForm());
+        assertEquals(MedicationForm.TABLET, createdMedication.getForm());
         assertEquals(100.0, createdMedication.getPrice());
 
         verify(medicationMapper, times(1)).toEntity(any(MedicationDto.class));
@@ -141,7 +141,7 @@ class MedicationServiceTest {
         MedicationDto result = medicationService.update(1L, medicationDto);
 
         assertEquals("Ibuprofen", result.getName());
-        assertEquals(MedicationForm.CAPSULE, result.getMedicationForm());
+        assertEquals(MedicationForm.CAPSULE, result.getForm());
         assertEquals(150.0, result.getPrice());
         verify(medicationRepository, times(1)).findById(1L);
         verify(medicationRepository, times(1)).save(any(Medication.class));

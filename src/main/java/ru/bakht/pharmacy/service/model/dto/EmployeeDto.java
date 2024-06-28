@@ -20,7 +20,7 @@ public class EmployeeDto {
     String name;
 
     @NotNull(message = "Должность обязательна")
-    EmployeePosition employeePosition;
+    EmployeePosition position;
 
     @Email(message = "Электронная почта должна быть действительной")
     String email;

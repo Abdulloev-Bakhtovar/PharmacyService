@@ -18,16 +18,16 @@ public class OrderDto {
     Long id;
 
     @NotNull(message = "Покупатель обязателен")
-    CustomerDto customerDto;
+    CustomerDto customer;
 
     @NotNull(message = "Сотрудник обязателен")
-    EmployeeDto employeeDto;
+    EmployeeDto employee;
 
     @NotNull(message = "Аптека обязательна")
-    PharmacyDto pharmacyDto;
+    PharmacyDto pharmacy;
 
     @NotNull(message = "Лекарство обязательно")
-    MedicationDto medicationDto;
+    MedicationDto medication;
 
     @NotNull(message = "Количество обязательно")
     @Min(value = 1, message = "Количество должно быть не менее 1")

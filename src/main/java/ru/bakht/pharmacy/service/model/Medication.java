@@ -26,7 +26,7 @@ public class Medication {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "form")
-    MedicationForm medicationForm;
+    MedicationForm form;
 
     @Column(name = "price")
     Double price;
