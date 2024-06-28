@@ -3,12 +3,15 @@ package ru.bakht.pharmacy.service.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.MedicationMapper;
+import ru.bakht.pharmacy.service.model.Medication;
 import ru.bakht.pharmacy.service.model.dto.MedicationDto;
 import ru.bakht.pharmacy.service.repository.MedicationRepository;
+import ru.bakht.pharmacy.service.specification.MedicationSpecification;
 
 import java.util.List;
 
@@ -92,5 +95,21 @@ public class MedicationService implements BaseService<MedicationDto, Long> {
     public void delete(Long id) {
         log.info("Удаление лекарства с идентификатором {}", id);
         medicationRepository.deleteById(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Transactional(readOnly = true)
+    public List<MedicationDto> getByFilters(MedicationDto medicationDto) {
+        log.info("Фильтрация лекарств по заданным критериям");
+        Specification<Medication> specification = Specification.where(MedicationSpecification.hasName(medicationDto.getName()))
+                .and(MedicationSpecification.hasForm(medicationDto.getForm()))
+                .and(MedicationSpecification.hasPrice(medicationDto.getPrice()))
+                .and(MedicationSpecification.hasExpirationDate(medicationDto.getExpirationDate()));
+
+        return medicationRepository.findAll(specification).stream()
+                .map(medicationMapper::toDto)
+                .toList();
     }
 }

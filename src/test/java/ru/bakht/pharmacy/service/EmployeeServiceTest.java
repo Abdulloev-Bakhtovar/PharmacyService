@@ -60,7 +60,7 @@ class EmployeeServiceTest {
         assertEquals(1, employees.size());
         assertEquals(1L, employees.getFirst().getId());
         assertEquals("Ivan Ivanov", employees.getFirst().getName());
-        assertEquals(EmployeePosition.PHARMACIST, employees.getFirst().getEmployeePosition());
+        assertEquals(EmployeePosition.PHARMACIST, employees.getFirst().getPosition());
         assertEquals("ivanov@example.com", employees.getFirst().getEmail());
 
         verify(employeeRepository, times(1)).findAll();
@@ -81,7 +81,7 @@ class EmployeeServiceTest {
 
         assertEquals(1L, foundEmployee.getId());
         assertEquals("Ivan Ivanov", foundEmployee.getName());
-        assertEquals(EmployeePosition.PHARMACIST, foundEmployee.getEmployeePosition());
+        assertEquals(EmployeePosition.PHARMACIST, foundEmployee.getPosition());
         assertEquals("ivanov@example.com", foundEmployee.getEmail());
 
         verify(employeeRepository, times(1)).findById(1L);
@@ -129,7 +129,7 @@ class EmployeeServiceTest {
 
         assertEquals(1L, createdEmployee.getId());
         assertEquals("Ivan Ivanov", createdEmployee.getName());
-        assertEquals(EmployeePosition.PHARMACIST, createdEmployee.getEmployeePosition());
+        assertEquals(EmployeePosition.PHARMACIST, createdEmployee.getPosition());
         assertEquals("ivanov@example.com", createdEmployee.getEmail());
 
         verify(employeeMapper, times(1)).toEntity(any(EmployeeDto.class));
@@ -162,7 +162,7 @@ class EmployeeServiceTest {
         EmployeeDto result = employeeService.update(1L, employeeDto);
 
         assertEquals("Petr Petrov", result.getName());
-        assertEquals(EmployeePosition.MANAGER, result.getEmployeePosition());
+        assertEquals(EmployeePosition.MANAGER, result.getPosition());
         assertEquals("petrov@example.com", result.getEmail());
         verify(employeeRepository, times(1)).findById(1L);
         verify(employeeRepository, times(1)).save(any(Employee.class));

@@ -27,7 +27,7 @@ public class Employee {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "position")
-    EmployeePosition employeePosition;
+    EmployeePosition position;
 
     @Column(name = "email")
     String email;

@@ -4,16 +4,19 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bakht.pharmacy.service.exception.EntityNotFoundException;
 import ru.bakht.pharmacy.service.mapper.MedicationMapper;
 import ru.bakht.pharmacy.service.mapper.PharmacyMapper;
+import ru.bakht.pharmacy.service.model.Pharmacy;
 import ru.bakht.pharmacy.service.model.PharmacyMedication;
 import ru.bakht.pharmacy.service.model.PharmacyMedicationId;
 import ru.bakht.pharmacy.service.model.dto.PharmacyDto;
 import ru.bakht.pharmacy.service.model.dto.PharmacyMedicationDto;
 import ru.bakht.pharmacy.service.repository.PharmacyRepository;
+import ru.bakht.pharmacy.service.specification.PharmacySpecification;
 
 import java.util.List;
 
@@ -101,6 +104,18 @@ public class PharmacyService implements BaseService<PharmacyDto, Long> {
     public void delete(Long id) {
         log.info("Удаление аптеки с id {}", id);
         pharmacyRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PharmacyDto> getByFilters(PharmacyDto pharmacyDto) {
+        log.info("Фильтрация аптек по заданным критериям");
+        Specification<Pharmacy> specification = Specification.where(PharmacySpecification.hasName(pharmacyDto.getName()))
+                .and(PharmacySpecification.hasAddress(pharmacyDto.getAddress()))
+                .and(PharmacySpecification.hasPhone(pharmacyDto.getPhone()));
+
+        return pharmacyRepository.findAll(specification).stream()
+                .map(pharmacyMapper::toDto)
+                .toList();
     }
 
     /**

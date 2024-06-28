@@ -54,4 +54,11 @@ public abstract class AbstractController<T, ID extends Number> {
     public void delete(@PathVariable @Min(1) ID id) {
         baseService.delete(id);
     }
+
+    @PostMapping("/filter")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
+    @Operation(summary = "Получить сущности по фильтрам", description = "Возвращает список сущностей по заданным фильтрам")
+    public List<T> getByFilters(@RequestBody T filters) {
+        return baseService.getByFilters(filters);
+    }
 }

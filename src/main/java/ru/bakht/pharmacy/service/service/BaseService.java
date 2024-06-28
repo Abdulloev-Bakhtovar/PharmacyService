@@ -53,4 +53,12 @@ public interface BaseService<T, ID extends Number> {
      * @throws EntityNotFoundException если сущность с указанным идентификатором не найдена.
      */
     void delete(ID id);
+
+    /**
+     * Получить список сущностей по заданным фильтрам.
+     *
+     * @param filters объект с фильтрами для запроса.
+     * @return список объектов типа T, отфильтрованных по заданным критериям.
+     */
+    List<T> getByFilters(T filters);
 }

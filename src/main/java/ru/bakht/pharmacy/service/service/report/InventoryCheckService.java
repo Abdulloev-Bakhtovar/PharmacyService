@@ -96,7 +96,7 @@ public class InventoryCheckService {
                         for (PharmacyMedication pm : pharmacyMedications) {
                             message.append("ID: ").append(pm.getMedication().getId())
                                     .append(", Наименование: ").append(pm.getMedication().getName())
-                                    .append(", Форма выпуска: ").append(pm.getMedication().getMedicationForm().name())
+                                    .append(", Форма выпуска: ").append(pm.getMedication().getForm().name())
                                     .append(", Цена: ").append(pm.getMedication().getPrice())
                                     .append(", Количество: ").append(pm.getQuantity())
                                     .append("\n");

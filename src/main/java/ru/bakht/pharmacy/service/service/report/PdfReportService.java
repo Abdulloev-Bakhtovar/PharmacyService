@@ -49,7 +49,7 @@ public class PdfReportService implements ReportGenerator {
         for (MedicationDto medication : medications) {
             table.addCell(new Paragraph(medication.getId().toString()).setFont(font));
             table.addCell(new Paragraph(medication.getName()).setFont(font));
-            table.addCell(new Paragraph(medication.getMedicationForm().name()).setFont(font));
+            table.addCell(new Paragraph(medication.getForm().name()).setFont(font));
             table.addCell(new Paragraph(medication.getPrice().toString()).setFont(font));
             table.addCell(new Paragraph(dateFormat.format(medication.getExpirationDate())).setFont(font));
         }
@@ -86,7 +86,7 @@ public class PdfReportService implements ReportGenerator {
 
         for (OrderDto order : orders) {
             table.addCell(new Paragraph(order.getId().toString()).setFont(font));
-            table.addCell(new Paragraph(order.getMedicationDto().getName()).setFont(font));
+            table.addCell(new Paragraph(order.getMedication().getName()).setFont(font));
             table.addCell(new Paragraph(order.getQuantity().toString()).setFont(font));
             table.addCell(new Paragraph(order.getTotalAmount().toString()).setFont(font));
             table.addCell(new Paragraph(dateFormat.format(order.getOrderDate())).setFont(font));
